@@ -732,9 +732,20 @@ function renderBabyNames() {
   });
 
   if (filtered.length === 0) {
+    const onlineSearchBtn = query.trim() ? `
+      <div class="mt-4">
+        <button onclick="searchNameOnline('${query.replace(/'/g, "\\'")}')" 
+                class="px-4 py-2 text-xs font-bold text-rose-300 hover:text-white bg-rose-500/10 hover:bg-rose-500/30 border border-rose-500/30 hover:border-rose-500/50 rounded-xl transition-all shadow-sm">
+          <i class="fas fa-search mr-1.5"></i> Search Web Meaning for "${state.nameSearchFilter}"
+        </button>
+      </div>
+    ` : "";
+
     container.innerHTML = `
-      <div class="col-span-full py-8 text-center text-zinc-500 text-xs italic">
-        No names matching filters found. Click the Refresh icon to fetch new global names!
+      <div class="col-span-full py-10 text-center text-zinc-500 text-xs italic flex flex-col items-center justify-center">
+        <span>No local names match your filter.</span>
+        ${onlineSearchBtn}
+        ${!query.trim() ? '<span class="mt-1">Click the Refresh icon in the header to fetch live registry names!</span>' : ''}
       </div>
     `;
     return;
@@ -769,6 +780,211 @@ function renderBabyNames() {
 
   renderFavoriteNamesSidebar();
 }
+
+/**
+ * Dynamic Wikipedia Search API integration for name meanings
+ */
+async function searchNameOnline(queryText) {
+  if (!queryText || !queryText.trim()) return;
+  const nameQuery = queryText.trim();
+  
+  // Format search query nicely (e.g. "aria" -> "Aria")
+  const formattedName = nameQuery.charAt(0).toUpperCase() + nameQuery.slice(1).toLowerCase();
+
+  // Show a loading state in the grid
+  const container = el.namesGridContainer;
+  container.innerHTML = `
+    <div class="col-span-full py-12 text-center text-rose-300">
+      <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+      <p class="text-xs font-semibold">Searching Wikipedia database for "${formattedName}"...</p>
+    </div>
+  `;
+
+  // Disable search button during fetch if we can
+  const searchBtnIcon = document.querySelector("#name-search-web-btn i");
+  if (searchBtnIcon) {
+    searchBtnIcon.className = "fas fa-spinner fa-spin";
+  }
+
+  try {
+    let summaryData = null;
+    
+    // 1. Try fetching exact Wikipedia page summary matching variations
+    const pagesToTry = [
+      `${formattedName}_(given_name)`,
+      `${formattedName}_(name)`,
+      formattedName
+    ];
+
+    for (const title of pagesToTry) {
+      try {
+        const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}?origin=*`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          // Skip disambiguation pages and verify there's actual content
+          if (data.type !== "disambiguation" && data.extract && data.extract.trim().length > 10) {
+            summaryData = data;
+            break;
+          }
+        }
+      } catch (e) {
+        console.warn(`Wikipedia page summary check failed for: ${title}`, e);
+      }
+    }
+
+    // 2. If direct summaries failed, try Wikipedia Action Search API to find matches
+    if (!summaryData) {
+      try {
+        const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(formattedName)}+given+name&format=json&origin=*`;
+        const searchRes = await fetch(searchUrl);
+        if (searchRes.ok) {
+          const searchData = await searchRes.json();
+          const results = searchData.query?.search || [];
+          if (results.length > 0) {
+            // Fetch summary for the top search result
+            const bestTitle = results[0].title;
+            const summaryUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(bestTitle)}?origin=*`;
+            const summaryRes = await fetch(summaryUrl);
+            if (summaryRes.ok) {
+              const data = await summaryRes.json();
+              if (data.type !== "disambiguation" && data.extract && data.extract.trim().length > 10) {
+                summaryData = data;
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn(`Wikipedia search API query failed:`, e);
+      }
+    }
+
+    let item = null;
+
+    if (summaryData) {
+      // 3. Parse gender from the extracted text
+      const extractLower = summaryData.extract.toLowerCase();
+      const descLower = (summaryData.description || "").toLowerCase();
+      
+      let gender = "unisex";
+      if (
+        extractLower.includes("female given name") || 
+        extractLower.includes("feminine given name") ||
+        extractLower.includes("girl's name") ||
+        extractLower.includes("feminine name") ||
+        descLower.includes("female given name") ||
+        descLower.includes("feminine") ||
+        descLower.includes("girl")
+      ) {
+        gender = "girl";
+      } else if (
+        extractLower.includes("male given name") || 
+        extractLower.includes("masculine given name") ||
+        extractLower.includes("boy's name") ||
+        extractLower.includes("masculine name") ||
+        descLower.includes("male given name") ||
+        descLower.includes("masculine") ||
+        descLower.includes("boy")
+      ) {
+        gender = "boy";
+      }
+
+      // 4. Parse origin from the extracted text
+      const origins = [
+        "Sanskrit", "Indian", "Hindi", "Hebrew", "Latin", "Greek", "Arabic", 
+        "German", "French", "Italian", "Spanish", "Irish", "Gaelic", "Norse", 
+        "Scandinavian", "Persian", "Japanese", "Chinese", "Korean", "African", 
+        "Swahili", "Russian", "Slavic", "English", "Celtic", "Welsh", "Scottish"
+      ];
+      
+      let detectedOrigins = [];
+      const searchContext = (summaryData.description || "") + " " + summaryData.extract;
+      origins.forEach(o => {
+        const regex = new RegExp(`\\b${o}\\b`, "i");
+        if (regex.test(searchContext)) {
+          detectedOrigins.push(o);
+        }
+      });
+
+      const origin = detectedOrigins.length > 0 ? detectedOrigins.slice(0, 2).join("/") : "Global";
+
+      // 5. Clean meaning and format
+      let meaning = summaryData.extract;
+      // Truncate if extremely long to maintain beautiful layout
+      if (meaning.length > 200) {
+        meaning = meaning.substring(0, 197) + "...";
+      }
+
+      item = {
+        name: formattedName,
+        gender: gender,
+        origin: origin,
+        meaning: meaning,
+        tag: "Online Search"
+      };
+    } else {
+      // 6. Final fallback: Procedural Generator (so user always gets a result!)
+      const proceduralMeaning = getSmartMeaning(formattedName, "Global", "unisex");
+      item = {
+        name: formattedName,
+        gender: "unisex",
+        origin: "Global",
+        meaning: `${proceduralMeaning} (Procedural match)`,
+        tag: "Offline Est."
+      };
+    }
+
+    // Add to namesList if not already present
+    const exists = state.namesList.some(n => n.name.toLowerCase() === formattedName.toLowerCase());
+    if (!exists) {
+      state.namesList.unshift(item);
+    } else {
+      // Update existing item with online results if it was previously offline
+      const idx = state.namesList.findIndex(n => n.name.toLowerCase() === formattedName.toLowerCase());
+      if (idx !== -1 && (state.namesList[idx].tag === "Offline Est." || state.namesList[idx].meaning.includes("Procedural"))) {
+        state.namesList[idx] = item;
+      }
+    }
+
+    // Ensure the filter is set to match the item and render it
+    state.nameSearchFilter = formattedName;
+    el.nameInputSearch.value = formattedName;
+    state.nameGenderFilter = "all";
+    el.nameSelectGender.value = "all";
+    state.nameCategoryFilter = "all";
+    el.nameSelectCategory.value = "all";
+
+    renderBabyNames();
+    showNotification(`Found meaning for "${formattedName}"!`, "success");
+  } catch (error) {
+    console.error("Online name search failed:", error);
+    showNotification("Failed online lookup. Working offline.", "info");
+    
+    // offline estimate fallback immediately
+    const proceduralMeaning = getSmartMeaning(formattedName, "Global", "unisex");
+    const item = {
+      name: formattedName,
+      gender: "unisex",
+      origin: "Global",
+      meaning: `${proceduralMeaning} (Offline estimation)`,
+      tag: "Offline Est."
+    };
+    
+    const exists = state.namesList.some(n => n.name.toLowerCase() === formattedName.toLowerCase());
+    if (!exists) {
+      state.namesList.unshift(item);
+    }
+    state.nameSearchFilter = formattedName;
+    el.nameInputSearch.value = formattedName;
+    renderBabyNames();
+  } finally {
+    if (searchBtnIcon) {
+      searchBtnIcon.className = "fas fa-search";
+    }
+  }
+}
+
+window.searchNameOnline = searchNameOnline;
 
 /**
  * Live Fetch of Trending baby names from registry records via randomuser API
@@ -1176,6 +1392,7 @@ document.addEventListener("DOMContentLoaded", () => {
     namesGridContainer: document.getElementById("names-grid-container"),
     favoriteNamesContainer: document.getElementById("favorite-names-container"),
     nameInputSearch: document.getElementById("name-input-search"),
+    nameSearchWebBtn: document.getElementById("name-search-web-btn"),
     nameSelectGender: document.getElementById("name-select-gender"),
     nameSelectCategory: document.getElementById("name-select-category"),
     nameRefreshBtn: document.getElementById("name-refresh-btn"),
@@ -1221,6 +1438,15 @@ document.addEventListener("DOMContentLoaded", () => {
   el.nameInputSearch.addEventListener("input", (e) => {
     state.nameSearchFilter = e.target.value;
     renderBabyNames();
+  });
+  el.nameInputSearch.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      searchNameOnline(state.nameSearchFilter);
+    }
+  });
+  el.nameSearchWebBtn.addEventListener("click", () => {
+    searchNameOnline(state.nameSearchFilter);
   });
   el.nameSelectGender.addEventListener("change", (e) => {
     state.nameGenderFilter = e.target.value;
