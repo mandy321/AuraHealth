@@ -1,262 +1,213 @@
-/* Stylesheet for Women's Health client-side SPA */
+/* Rebuilt styles.css - Welcoming Pastel Spa Aesthetic */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  --color-primary: #8b5cf6;
-  --color-secondary: #f43f5e;
-  --color-dark-bg: #090514;
+  --color-rose-light: #fff1f2;
+  --color-lavender-light: #faf5ff;
+  --color-cream: #fffdfa;
+  --color-primary: #ec4899; /* Pink-500 */
+  --color-secondary: #f43f5e; /* Rose-500 */
+  --color-accent: #eab308; /* Yellow-500/Gold */
   --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --text-dark: #2d2338;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--color-dark-bg);
+  background: linear-gradient(135deg, var(--color-rose-light) 0%, var(--color-cream) 50%, var(--color-lavender-light) 100%);
+  background-attachment: fixed;
+  color: var(--text-dark);
   overflow-x: hidden;
   position: relative;
 }
 
-/* Custom scrollbars */
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(15, 10, 25, 0.6);
+  background: rgba(244, 63, 94, 0.05);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.4);
+  background: rgba(244, 63, 94, 0.25);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(244, 63, 94, 0.6);
+  background: rgba(244, 63, 94, 0.45);
 }
 
-/* Ambient glow blobs */
-.bg-glow-purple {
+/* Ambient glow blobs - Warm, soft colors */
+.bg-glow-rose {
   position: absolute;
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0) 70%);
-  filter: blur(60px);
+  background: radial-gradient(circle, rgba(254, 205, 211, 0.45) 0%, rgba(254, 205, 211, 0) 70%);
+  filter: blur(50px);
   z-index: 0;
   pointer-events: none;
-  animation: float-slow 25s infinite alternate ease-in-out;
+  animation: float-slow 20s infinite alternate ease-in-out;
 }
 
-.bg-glow-rose {
+.bg-glow-lavender {
   position: absolute;
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(244, 63, 94, 0.12) 0%, rgba(244, 63, 94, 0) 70%);
-  filter: blur(80px);
+  background: radial-gradient(circle, rgba(233, 213, 255, 0.45) 0%, rgba(233, 213, 255, 0) 70%);
+  filter: blur(70px);
   z-index: 0;
   pointer-events: none;
-  animation: float-slow-reverse 30s infinite alternate ease-in-out;
+  animation: float-slow-reverse 25s infinite alternate ease-in-out;
 }
 
 @keyframes float-slow {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-  100% {
-    transform: translate(100px, 50px) scale(1.1);
-  }
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(60px, 40px) scale(1.08); }
 }
 
 @keyframes float-slow-reverse {
-  0% {
-    transform: translate(0, 0) scale(1.1);
-  }
-  100% {
-    transform: translate(-100px, -50px) scale(0.9);
-  }
+  0% { transform: translate(0, 0) scale(1.08); }
+  100% { transform: translate(-60px, -40px) scale(0.92); }
 }
 
-/* Glassmorphism panel styles */
+/* Pastel Glassmorphism Panels */
 .glass-panel {
-  background: rgba(17, 12, 28, 0.55);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(244, 63, 94, 0.08);
+  box-shadow: 0 10px 30px -10px rgba(225, 29, 72, 0.04), 0 1px 3px rgba(225, 29, 72, 0.02);
+  transition: border-color 0.25s, box-shadow 0.25s;
 }
 
 .glass-panel-hover:hover {
-  border-color: rgba(244, 63, 94, 0.2);
-  box-shadow: 0 8px 32px 0 rgba(244, 63, 94, 0.05);
+  border-color: rgba(244, 63, 94, 0.22);
+  box-shadow: 0 12px 35px -8px rgba(225, 29, 72, 0.08);
 }
 
-/* Glass Inputs */
+/* Inputs styled for light theme */
 .glass-input {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1.5px solid rgba(225, 29, 72, 0.1);
+  color: var(--text-dark);
   transition: all 0.2s ease-in-out;
 }
 
 .glass-input:focus {
   outline: none;
-  border-color: rgba(139, 92, 246, 0.6);
-  background: rgba(255, 255, 255, 0.07);
-  box-shadow: 0 0 10px rgba(139, 92, 246, 0.15);
+  border-color: rgba(244, 63, 94, 0.5);
+  background: #fff;
+  box-shadow: 0 0 12px rgba(244, 63, 94, 0.08);
 }
 
-/* Phase styling for calendar cells */
+/* Cycle Phase Highlights */
 .phase-menstrual {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(239, 68, 68, 0.08) 100%);
-  border: 1.5px solid rgba(239, 68, 68, 0.4) !important;
+  background: linear-gradient(135deg, rgba(254, 226, 226, 0.75) 0%, rgba(254, 226, 226, 0.35) 100%);
+  border: 1.5px solid rgba(248, 113, 113, 0.45) !important;
 }
 
 .phase-follicular {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(59, 130, 246, 0.08) 100%);
-  border: 1.5px solid rgba(59, 130, 246, 0.4) !important;
+  background: linear-gradient(135deg, rgba(219, 234, 254, 0.75) 0%, rgba(219, 234, 254, 0.35) 100%);
+  border: 1.5px solid rgba(96, 165, 250, 0.45) !important;
 }
 
 .phase-ovulatory {
-  background: linear-gradient(135deg, rgba(244, 63, 94, 0.35) 0%, rgba(244, 63, 94, 0.15) 100%);
-  border: 1.5px solid rgba(244, 63, 94, 0.7) !important;
-  box-shadow: 0 0 12px rgba(244, 63, 94, 0.2);
-  animation: glow-pulse 2s infinite ease-in-out;
+  background: linear-gradient(135deg, rgba(ffe4e6, 0.85) 0%, rgba(ffe4e6, 0.45) 100%);
+  border: 2px solid rgba(251, 113, 133, 0.8) !important;
+  box-shadow: 0 0 15px rgba(251, 113, 133, 0.25);
+  animation: ovulate-pulse 2s infinite ease-in-out;
 }
 
 .phase-luteal {
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(168, 85, 247, 0.08) 100%);
-  border: 1.5px solid rgba(168, 85, 247, 0.4) !important;
+  background: linear-gradient(135deg, rgba(243, 232, 255, 0.75) 0%, rgba(243, 232, 255, 0.35) 100%);
+  border: 1.5px solid rgba(192, 132, 252, 0.45) !important;
 }
 
-@keyframes glow-pulse {
-  0%, 100% {
-    box-shadow: 0 0 8px rgba(244, 63, 94, 0.15);
-  }
-  50% {
-    box-shadow: 0 0 16px rgba(244, 63, 94, 0.35);
-  }
+@keyframes ovulate-pulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(251, 113, 133, 0.15); }
+  50% { box-shadow: 0 0 18px rgba(251, 113, 133, 0.35); }
 }
 
-/* Calendar selected/today indicator */
 .day-selected {
   position: relative;
 }
 .day-selected::after {
   content: '';
   position: absolute;
-  bottom: 3px;
-  width: 5px;
-  height: 5px;
-  background-color: #fff;
+  bottom: 4px;
+  width: 6px;
+  height: 6px;
+  background-color: var(--color-secondary);
   border-radius: 50%;
   left: 50%;
   transform: translateX(-50%);
 }
 
 .day-today {
-  outline: 2px solid #fff;
+  outline: 2px solid var(--text-dark);
   outline-offset: -2px;
 }
 
-/* Custom transitions and sliders */
-.transition-all-300 {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Breathe Timer Guide Component */
+.breathe-outer {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: rgba(251, 113, 133, 0.05);
+  border: 1px solid rgba(251, 113, 133, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
+.breathe-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251, 113, 133, 0.35) 0%, rgba(244, 63, 94, 0.15) 100%);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 1s ease-in-out, background 1s ease-in-out, border 1s ease-in-out;
+  position: relative;
+  z-index: 10;
+}
+
+/* Custom slider */
 .timeline-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: #f43f5e;
+  background: var(--color-secondary);
   cursor: pointer;
-  border: 3px solid #fff;
-  box-shadow: 0 0 10px rgba(244, 63, 94, 0.5);
+  border: 3.5px solid #fff;
+  box-shadow: 0 4px 10px rgba(244, 63, 94, 0.25);
   transition: transform 0.1s ease;
 }
-
 .timeline-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.25);
+  transform: scale(1.2);
 }
 
 .timeline-slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  background: #f43f5e;
+  background: var(--color-secondary);
   cursor: pointer;
   border: 3px solid #fff;
-  box-shadow: 0 0 10px rgba(244, 63, 94, 0.5);
+  box-shadow: 0 4px 10px rgba(244, 63, 94, 0.25);
   transition: transform 0.1s ease;
 }
-
 .timeline-slider::-moz-range-thumb:hover {
-  transform: scale(1.25);
+  transform: scale(1.2);
 }
 
-/* Print Styling */
-@media print {
-  body {
-    background: #fff !important;
-    color: #000 !important;
-    font-size: 12pt;
-    padding: 0;
-    margin: 0;
-  }
-
-  /* Hide everything not relevant to the printed clinical report */
-  body > *:not(#print-report-area) {
-    display: none !important;
-  }
-
-  #print-report-area {
-    display: block !important;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100% !important;
-    padding: 20px !important;
-    background: white !important;
-    color: black !important;
-  }
-
-  .no-print {
-    display: none !important;
-  }
-
-  /* Design a professional clinical sheet layout */
-  .clinical-box {
-    border: 1px solid #ccc !important;
-    padding: 15px !important;
-    margin-bottom: 20px !important;
-    border-radius: 4px;
-    background: #f9f9f9 !important;
-    color: #000 !important;
-    page-break-inside: avoid;
-  }
-
-  h1, h2, h3, h4 {
-    color: #000 !important;
-    margin-top: 10px;
-    margin-bottom: 5px;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-  }
-
-  th, td {
-    border: 1px solid #ddd !important;
-    padding: 8px;
-    text-align: left;
-  }
-
-  th {
-    background-color: #f2f2f2 !important;
-    color: black !important;
-  }
-}
-
-/* Utility to hide print report area in standard browser view */
-#print-report-area {
-  display: none;
+/* Name Explorer Favorites Grid Scroll */
+.names-grid-height {
+  max-height: 480px;
+  overflow-y: auto;
 }

@@ -1,55 +1,100 @@
 /**
- * AuraHealth - Client-Side Women's Health SPA Logic
+ * AuraHealth - Client-Side Women's Health & Baby Companion
  * Features:
- *  - Cycle Visualization (Calendar view with cycle phase overlays)
- *  - Pregnancy Testing Intelligence
- *  - Gestational Milestone Timeline
- *  - Symptom Triage & Clinical Export Engine
+ *  - Fertility & Cycle Visualizer (Pastel Calendar grid mapping)
+ *  - Pregnancy Testing Kit Intelligence (hCG thresholds & guidance)
+ *  - Gestational Milestone Timeline (Weeks 1-12)
+ *  - Interactive Baby Names Explorer (Gen-Z, Indian, and Global names + Live API fetch)
+ *  - Mindful Breathing Timer (Cramps & Relaxation relief guide)
+ *  - Postpartum Recovery & Newborn Care Guide (Do's & Don'ts + Medical Disclaimer)
  *  - LocalStorage Privacy Architecture
  */
 
-// Global App State
+// App State
 const state = {
-  // Cycle config defaults
+  // Cycle configurations
   cycleLength: 28,
   periodLength: 5,
   lastPeriodDate: "", // YYYY-MM-DD
   
-  // Current calendar navigation
+  // Calendar navigation
   currentYear: new Date().getFullYear(),
-  currentMonth: new Date().getMonth(), // 0-indexed
-  
-  // Selected day on calendar for logging
-  selectedDateStr: "", // YYYY-MM-DD
-  
-  // Active Tab
-  activeTab: "fertility", // fertility, testing, timeline, triage, logs
-  
-  // Gestational Timeline
+  currentMonth: new Date().getMonth(),
+  selectedDateStr: "", 
+
+  // Tab navigation
+  activeTab: "fertility",
+
+  // Pregnancy timeline
   selectedWeek: 4,
-  
-  // Local logs & user profile
-  logs: {},
-  profile: {}
+
+  // Baby Names Explorer
+  namesList: [],
+  favoriteNames: [],
+  nameSearchFilter: "",
+  nameGenderFilter: "all",
+  nameCategoryFilter: "all",
+
+  // Mindful Breathing state
+  breatheActive: false,
+  breatheInterval: null,
+  breatheTimer: 0,
+  breathePhase: "Inhale", // Inhale, Hold, Exhale, Hold
+  breatheRatio: { inhale: 4, hold1: 4, exhale: 4, hold2: 4 }, // default Box
+  breatheCount: 4,
+  breatheTechnique: "box", // box, relax
+
+  // Local storage cache
+  logs: {}
 };
 
-// Phase color mapping
-const PHASE_CLASSES = {
-  menstrual: "phase-menstrual text-red-400 border-red-500",
-  follicular: "phase-follicular text-blue-400 border-blue-500",
-  ovulatory: "phase-ovulatory text-rose-400 border-rose-500",
-  luteal: "phase-luteal text-purple-400 border-purple-500",
-  none: "border-zinc-800 text-zinc-400"
-};
+// Curated Baby Names Database (Modern Indian, Gen-Z, Global Trending)
+const localBabyNames = [
+  // Modern Indian Names
+  { name: "Aarav", gender: "boy", origin: "Indian", meaning: "Peaceful; wisdom; musical note", tag: "Modern Indian" },
+  { name: "Ananya", gender: "girl", origin: "Indian", meaning: "Matchless; unique; peerless", tag: "Modern Indian" },
+  { name: "Vihaan", gender: "boy", origin: "Indian", meaning: "Dawn; morning; start of era", tag: "Modern Indian" },
+  { name: "Myra", gender: "girl", origin: "Indian", meaning: "Sweet; beloved; swift light", tag: "Modern Indian" },
+  { name: "Ishaan", gender: "boy", origin: "Indian", meaning: "Lord Shiva; light indicator", tag: "Modern Indian" },
+  { name: "Kiara", gender: "girl", origin: "Indian/Italian", meaning: "Clear; bright; soft light", tag: "Modern Indian" },
+  { name: "Kabir", gender: "boy", origin: "Indian", meaning: "Great; saintly poet", tag: "Modern Indian" },
+  { name: "Diya", gender: "girl", origin: "Indian", meaning: "Clay lamp; light guidance", tag: "Modern Indian" },
+  { name: "Advait", gender: "boy", origin: "Indian", meaning: "Unique; non-dualist", tag: "Modern Indian" },
+  { name: "Zara", gender: "girl", origin: "Arabic/Indian", meaning: "Princess; blooming flower", tag: "Modern Indian" },
+  { name: "Vivaan", gender: "boy", origin: "Indian", meaning: "Full of life; rays of sun", tag: "Modern Indian" },
+  { name: "Amaira", gender: "girl", origin: "Indian", meaning: "Beautiful princess; forever pretty", tag: "Modern Indian" },
+  { name: "Rudra", gender: "boy", origin: "Indian", meaning: "Lord Shiva; remover of pain", tag: "Modern Indian" },
+  { name: "Navya", gender: "girl", origin: "Indian", meaning: "Worth praising; young; modern", tag: "Modern Indian" },
 
-// Document Elements (populated in init)
+  // Gen-Z Names
+  { name: "Nova", gender: "girl", origin: "Latin", meaning: "New star; cosmic transition", tag: "Gen-Z" },
+  { name: "Kai", gender: "unisex", origin: "Hawaiian/Japanese", meaning: "Sea; shell; recovery", tag: "Gen-Z" },
+  { name: "Luna", gender: "girl", origin: "Latin", meaning: "Moon goddess; soft light", tag: "Gen-Z" },
+  { name: "Ezra", gender: "unisex", origin: "Hebrew", meaning: "Helper; strong companion", tag: "Gen-Z" },
+  { name: "Sage", gender: "unisex", origin: "Latin", meaning: "Wise protector; cleansing herb", tag: "Gen-Z" },
+  { name: "Zen", gender: "unisex", origin: "Japanese", meaning: "Peaceful focus; meditative", tag: "Gen-Z" },
+  { name: "River", gender: "unisex", origin: "Nature", meaning: "Flowing stream; gentle energy", tag: "Gen-Z" },
+  { name: "Hazel", gender: "girl", origin: "English", meaning: "Hazel tree; soft golden brown", tag: "Gen-Z" },
+  { name: "Arlo", gender: "boy", origin: "Spanish/German", meaning: "Barberry tree; fortified hill", tag: "Gen-Z" },
+  { name: "Wren", gender: "unisex", origin: "Nature", meaning: "Small songbird; free-spirited", tag: "Gen-Z" },
+
+  // Global Trending
+  { name: "Maeve", gender: "girl", origin: "Irish", meaning: "Intoxicating; mythical queen", tag: "Global Trending" },
+  { name: "Leo", gender: "boy", origin: "Latin", meaning: "Lion; courageous; brave", tag: "Global Trending" },
+  { name: "Noah", gender: "boy", origin: "Hebrew", meaning: "Rest; solace; comfort", tag: "Global Trending" },
+  { name: "Olivia", gender: "girl", origin: "Latin", meaning: "Olive branch; peace token", tag: "Global Trending" },
+  { name: "Elio", gender: "boy", origin: "Italian/Spanish", meaning: "Sun god; radiant light", tag: "Global Trending" },
+  { name: "Ayla", gender: "girl", origin: "Turkish/Hebrew", meaning: "Moonlight; oak tree", tag: "Global Trending" },
+  { name: "Theo", gender: "boy", origin: "Greek", meaning: "Divine gift; helper", tag: "Global Trending" }
+];
+
+// Document Elements
 let el = {};
 
 /**
- * Setup default dates and profiles
+ * Setup default configuration dates
  */
 function setupDefaults() {
-  // Set default last period date to 10 days ago so the user lands in a visible cycle phase
   const defaultDate = new Date();
   defaultDate.setDate(defaultDate.getDate() - 10);
   const yyyy = defaultDate.getFullYear();
@@ -58,22 +103,20 @@ function setupDefaults() {
   state.lastPeriodDate = `${yyyy}-${mm}-${dd}`;
   
   state.selectedDateStr = getTodayStr();
+  state.namesList = [...localBabyNames];
 }
 
-/**
- * Helper to get YYYY-MM-DD of today
- */
 function getTodayStr() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 /**
- * Load settings and logs from LocalStorage
+ * LocalStorage caching layers
  */
 function loadData() {
   try {
-    const profileJson = localStorage.getItem("aura_profile");
+    const profileJson = localStorage.getItem("aura_profile_v2");
     if (profileJson) {
       const prof = JSON.parse(profileJson);
       state.cycleLength = parseInt(prof.cycleLength) || 28;
@@ -84,144 +127,129 @@ function loadData() {
       saveProfile();
     }
 
-    const logsJson = localStorage.getItem("aura_logs");
-    if (logsJson) {
-      state.logs = JSON.parse(logsJson);
-    } else {
-      state.logs = {};
-    }
+    const logsJson = localStorage.getItem("aura_logs_v2");
+    state.logs = logsJson ? JSON.parse(logsJson) : {};
+
+    const favNamesJson = localStorage.getItem("aura_favorite_names");
+    state.favoriteNames = favNamesJson ? JSON.parse(favNamesJson) : [];
   } catch (e) {
-    console.error("Error reading localStorage: ", e);
+    console.error("LocalStorage load error:", e);
     setupDefaults();
   }
 }
 
-/**
- * Save configurations to LocalStorage
- */
 function saveProfile() {
   const prof = {
     cycleLength: state.cycleLength,
     periodLength: state.periodLength,
     lastPeriodDate: state.lastPeriodDate
   };
-  localStorage.setItem("aura_profile", JSON.stringify(prof));
+  localStorage.setItem("aura_profile_v2", JSON.stringify(prof));
 }
 
-/**
- * Save logs to LocalStorage
- */
 function saveLogs() {
-  localStorage.setItem("aura_logs", JSON.stringify(state.logs));
+  localStorage.setItem("aura_logs_v2", JSON.stringify(state.logs));
+}
+
+function saveFavorites() {
+  localStorage.setItem("aura_favorite_names", JSON.stringify(state.favoriteNames));
 }
 
 /**
- * Core Algorithm: Calculates fertility metrics for a given date
- * @param {Date} targetDate 
- * @returns {object} Phase info
+ * Cycle mathematical algorithms
  */
 function calculateCyclePhase(targetDate) {
   if (!state.lastPeriodDate) {
-    return { phase: "none", label: "Unknown", probability: "0%", desc: "Please set last period date.", index: 0 };
+    return { phase: "none", label: "Unknown", probability: "0%", desc: "Set cycle parameters.", index: 0 };
   }
 
   const startDate = new Date(state.lastPeriodDate + "T00:00:00");
   const checkDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
   
-  // Calculate difference in days
   const timeDiff = checkDate.getTime() - startDate.getTime();
   const diffDays = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
   
-  // Handle positive and negative cycle offsets mathematically
   const L = state.cycleLength;
   const P = state.periodLength;
-  const cycleDay = ((diffDays % L) + L) % L + 1; // 1-based index of day in cycle
+  const cycleDay = ((diffDays % L) + L) % L + 1; // 1-based cycle index
   
-  // Phase mapping rules
   if (cycleDay >= 1 && cycleDay <= P) {
     return {
       phase: "menstrual",
       label: "Menstrual Phase",
       probability: "Low (<1%)",
       probValue: 1,
-      color: "text-red-400",
-      desc: "Your body is shedding the uterine lining. Hormone levels (estrogen and progesterone) are at their lowest.",
+      color: "text-red-500",
+      desc: "Uterine lining is shedding. Estrogen and progesterone are at baseline levels. Rest, warm hydration, and gentle stretching are recommended.",
       cycleDay: cycleDay
     };
   } else if (cycleDay > P && cycleDay <= 10) {
-    // Gradual climb in follicular
-    // day P+1 to 10
     const progress = (cycleDay - P) / (11 - P);
-    const prob = Math.round(5 + progress * 20); // 5% to 25%
+    const prob = Math.round(5 + progress * 20); // 5% -> 25%
     return {
       phase: "follicular",
       label: "Follicular Phase",
       probability: `Gradual Climb (${prob}%)`,
       probValue: prob,
-      color: "text-blue-400",
-      desc: "Estrogen rises as your body prepares a follicle for ovulation. Uterine lining begins to thicken.",
+      color: "text-blue-500",
+      desc: "Estrogen is climbing to stimulate egg maturity. Energy levels start increasing. Great window for mental clarity and exercise.",
       cycleDay: cycleDay
     };
   } else if (cycleDay >= 11 && cycleDay <= 16) {
-    // Ovulatory Peak Window
-    // Peak probability is days 13-14 (up to 95+%)
     let prob = 35;
     if (cycleDay === 11) prob = 35;
     else if (cycleDay === 12) prob = 60;
     else if (cycleDay === 13) prob = 85;
-    else if (cycleDay === 14) prob = 98;
+    else if (cycleDay === 14) prob = 98; // peak
     else if (cycleDay === 15) prob = 80;
     else if (cycleDay === 16) prob = 30;
 
     return {
       phase: "ovulatory",
-      label: "Ovulatory Peak Window",
+      label: "Ovulatory Window",
       probability: `Peak Probability (${prob}%)`,
       probValue: prob,
-      color: "text-rose-400",
-      desc: "Luteinizing Hormone (LH) surges, triggering the release of a mature egg. This is your most fertile window.",
+      color: "text-rose-500",
+      desc: "Luteinizing Hormone (LH) peaks, releasing the mature egg. High metabolic energy. Focus on stress-relief, positive mood support, and balanced nutrition.",
       cycleDay: cycleDay
     };
   } else {
-    // Luteal phase
-    // Rapid drop to lowest
     const daysSinceOvulation = cycleDay - 16;
-    const remainingLutealDays = L - 16;
-    const progress = daysSinceOvulation / remainingLutealDays;
-    const prob = Math.max(1, Math.round(20 - progress * 20)); // drops to <1%
+    const remainingLuteal = L - 16;
+    const progress = daysSinceOvulation / remainingLuteal;
+    const prob = Math.max(1, Math.round(20 - progress * 20));
 
     return {
       phase: "luteal",
       label: "Luteal Phase",
       probability: `Rapid Drop to Lowest (${prob}%)`,
       probValue: prob,
-      color: "text-purple-400",
-      desc: "Progesterone peaks to support potential fertilization, then drops if no pregnancy occurs, triggers PMS symptoms.",
+      color: "text-purple-500",
+      desc: "Progesterone peaks to nurture a potential pregnancy, dropping if fertilization does not happen. Standard PMS signs might trigger. Gentle yoga and box breathing support relaxation.",
       cycleDay: cycleDay
     };
   }
 }
 
 /**
- * Tab Switching Controller
- * @param {string} tabId 
+ * Tab Controller
  */
 function switchTab(tabId) {
   state.activeTab = tabId;
   
-  // Update Navigation UI
+  // Navigation links styling
   document.querySelectorAll(".nav-tab-btn").forEach(btn => {
     const isCurrent = btn.getAttribute("data-tab") === tabId;
     if (isCurrent) {
-      btn.classList.add("text-rose-400", "border-rose-400", "bg-rose-500/10");
-      btn.classList.remove("text-zinc-400", "border-transparent", "hover:bg-zinc-800/40");
+      btn.classList.add("text-rose-600", "border-rose-500", "bg-rose-50");
+      btn.classList.remove("text-zinc-500", "border-transparent", "hover:bg-zinc-100/60");
     } else {
-      btn.classList.remove("text-rose-400", "border-rose-400", "bg-rose-500/10");
-      btn.classList.add("text-zinc-400", "border-transparent", "hover:bg-zinc-800/40");
+      btn.classList.remove("text-rose-600", "border-rose-500", "bg-rose-50");
+      btn.classList.add("text-zinc-500", "border-transparent", "hover:bg-zinc-100/60");
     }
   });
 
-  // Update Page Panels
+  // Toggle active views
   document.querySelectorAll(".tab-panel").forEach(panel => {
     if (panel.id === `${tabId}-panel`) {
       panel.classList.remove("hidden");
@@ -230,49 +258,48 @@ function switchTab(tabId) {
     }
   });
 
-  // Action overrides
+  // Action callbacks
   if (tabId === "fertility") {
     renderCalendar();
   } else if (tabId === "testing") {
     calculateTestingIntel();
+  } else if (tabId === "names") {
+    renderBabyNames();
+  } else if (tabId === "selfcare") {
+    loadDailyAffirmation();
   } else if (tabId === "logs") {
     renderLogsList();
   }
 }
 
 /**
- * Render standard Gregorian monthly grid overlaid with cycle phases
+ * Renders Gregorian monthly calendar grid overlaid with cycle phases
  */
 function renderCalendar() {
   const year = state.currentYear;
   const month = state.currentMonth;
-
-  // Header display
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
   el.calendarMonthTitle.innerText = `${monthNames[month]} ${year}`;
 
-  // Get date metrics
-  const firstDayIndex = new Date(year, month, 1).getDay(); // 0 is Sunday
-  // Adjust so Monday is first day of the week
-  const adjustedFirstDay = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+  const firstDay = new Date(year, month, 1).getDay();
+  const adjustedFirstDay = firstDay === 0 ? 6 : firstDay - 1; // Mon index
   const totalDays = new Date(year, month + 1, 0).getDate();
 
-  // Clear previous grid
   el.calendarGrid.innerHTML = "";
 
-  // Render blanks/padding for previous month days
+  // Render calendar offsets
   for (let i = 0; i < adjustedFirstDay; i++) {
     const blank = document.createElement("div");
-    blank.className = "h-16 md:h-20 bg-zinc-950/20 border border-zinc-900/40 rounded-lg opacity-25";
+    blank.className = "h-14 md:h-16 bg-zinc-50 border border-zinc-100 rounded-xl opacity-40";
     el.calendarGrid.appendChild(blank);
   }
 
   const todayStr = getTodayStr();
 
-  // Render days of current month
+  // Render monthly days
   for (let d = 1; d <= totalDays; d++) {
     const dateObj = new Date(year, month, d);
     const yyyy = dateObj.getFullYear();
@@ -283,26 +310,24 @@ function renderCalendar() {
     const cycleInfo = calculateCyclePhase(dateObj);
     const dayCell = document.createElement("div");
     
-    // Base styles
-    dayCell.className = `h-16 md:h-20 p-2 border rounded-lg cursor-pointer flex flex-col justify-between transition-all duration-200 glass-panel-hover ${PHASE_CLASSES[cycleInfo.phase]}`;
+    // Style overlays
+    dayCell.className = `h-14 md:h-16 p-1.5 border rounded-xl cursor-pointer flex flex-col justify-between transition-all duration-200 glass-panel-hover ${PHASE_CLASSES[cycleInfo.phase]}`;
     
-    // Content layout
-    let logBadge = "";
+    let badge = "";
     if (state.logs[dateStr]) {
-      logBadge = `<span class="w-2 h-2 rounded-full bg-rose-400 inline-block animate-pulse" title="Symptom Logged"></span>`;
+      badge = `<span class="w-1.5 h-1.5 rounded-full bg-rose-500 inline-block animate-pulse"></span>`;
     }
 
     dayCell.innerHTML = `
       <div class="flex justify-between items-start">
-        <span class="text-xs md:text-sm font-semibold">${d}</span>
-        ${logBadge}
+        <span class="text-xs font-bold">${d}</span>
+        ${badge}
       </div>
-      <div class="text-[9px] md:text-[11px] leading-tight font-medium opacity-85 truncate">
+      <div class="text-[9px] leading-tight font-medium opacity-80 truncate">
         ${cycleInfo.label.split(" ")[0]}
       </div>
     `;
 
-    // Highlighters
     if (dateStr === todayStr) {
       dayCell.classList.add("day-today");
     }
@@ -310,106 +335,82 @@ function renderCalendar() {
       dayCell.classList.add("day-selected");
     }
 
-    // Interaction handler
     dayCell.addEventListener("click", () => {
       state.selectedDateStr = dateStr;
-      
-      // Re-render grid to show selected highlights
       document.querySelectorAll(".day-selected").forEach(c => c.classList.remove("day-selected"));
       dayCell.classList.add("day-selected");
-
       updateSelectedDayPanel(dateStr, cycleInfo);
     });
 
     el.calendarGrid.appendChild(dayCell);
   }
 
-  // Update selection card for default/current selection
   const selectedDate = new Date(state.selectedDateStr + "T00:00:00");
   const initCycleInfo = calculateCyclePhase(selectedDate);
   updateSelectedDayPanel(state.selectedDateStr, initCycleInfo);
 }
 
 /**
- * Sidebar details & log symptoms widget for selected calendar day
+ * Diagnostic panel updates for selected date
  */
 function updateSelectedDayPanel(dateStr, cycleInfo) {
   const d = new Date(dateStr + "T00:00:00");
   const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
   el.selectedDayLabel.innerText = d.toLocaleDateString('en-US', options);
   
-  // Phase details
   el.selectedDayPhase.innerText = cycleInfo.label;
-  el.selectedDayPhase.className = `text-sm font-bold tracking-wide ${cycleInfo.color}`;
+  el.selectedDayPhase.className = `text-sm font-extrabold tracking-wide ${cycleInfo.color}`;
   
   el.selectedDayCycleDay.innerText = cycleInfo.cycleDay ? `Cycle Day ${cycleInfo.cycleDay}` : "N/A";
   el.selectedDayProbability.innerText = cycleInfo.probability;
   el.selectedDayPhaseDesc.innerText = cycleInfo.desc;
 
-  // Load existing symptoms
   const log = state.logs[dateStr] || {};
   el.logFlow.value = log.flow || "none";
   el.logPain.value = log.pain || "none";
   el.logMood.value = log.mood || "good";
   el.logNotes.value = log.notes || "";
   
-  // Display logged summary
   if (state.logs[dateStr]) {
     el.loggedSummaryText.innerHTML = `
-      <div class="mt-2 text-xs border-t border-zinc-800 pt-2 text-zinc-300">
+      <div class="mt-2 text-xs border-t border-rose-100 pt-2 text-zinc-600 space-y-0.5">
         <strong>Currently Logged:</strong><br/>
-        • Flow: <span class="capitalize text-rose-300 font-semibold">${log.flow || 'None'}</span><br/>
-        • Pain: <span class="capitalize text-rose-300 font-semibold">${log.pain || 'None'}</span><br/>
-        • Mood: <span class="capitalize text-rose-300 font-semibold">${log.mood || 'Standard'}</span><br/>
-        ${log.notes ? `• Notes: <span class="italic text-zinc-400">"${log.notes}"</span>` : ""}
+        • Flow: <span class="capitalize font-bold text-rose-600">${log.flow}</span><br/>
+        • Pain: <span class="capitalize font-bold text-rose-600">${log.pain}</span><br/>
+        • Mood: <span class="capitalize font-bold text-rose-600">${log.mood === 'good' ? 'Balanced' : log.mood}</span><br/>
+        ${log.notes ? `• Notes: <span class="italic text-zinc-500">"${log.notes}"</span>` : ""}
       </div>
     `;
     el.deleteLogBtn.classList.remove("hidden");
   } else {
-    el.loggedSummaryText.innerHTML = `<p class="text-xs text-zinc-500 italic mt-2">No symptoms logged for this date.</p>`;
+    el.loggedSummaryText.innerHTML = `<p class="text-[11px] text-zinc-400 italic mt-1.5">No symptoms logged for this date.</p>`;
     el.deleteLogBtn.classList.add("hidden");
   }
 }
 
-/**
- * Handle saving symptoms logs
- */
 function saveSymptomLog() {
   const dateStr = state.selectedDateStr;
-  const flow = el.logFlow.value;
-  const pain = el.logPain.value;
-  const mood = el.logMood.value;
-  const notes = el.logNotes.value.trim();
-
-  // If all are standard/empty, check if we should delete or just save default
   state.logs[dateStr] = {
-    flow: flow,
-    pain: pain,
-    mood: mood,
-    notes: notes
+    flow: el.logFlow.value,
+    pain: el.logPain.value,
+    mood: el.logMood.value,
+    notes: el.logNotes.value.trim()
   };
-
   saveLogs();
   renderCalendar();
-  showNotification("Symptoms Logged Successfully!", "success");
+  showNotification("Cycle Log updated successfully!", "success");
 }
 
-/**
- * Handle deleting symptoms logs
- */
 function deleteSymptomLog() {
   const dateStr = state.selectedDateStr;
   if (state.logs[dateStr]) {
     delete state.logs[dateStr];
     saveLogs();
     renderCalendar();
-    showNotification("Logged Data Cleared", "info");
+    showNotification("Cycle Log cleared", "info");
   }
 }
 
-/**
- * Renders the full checklist history in the data logs tab
- */
 function renderLogsList() {
   const container = el.logsListContainer;
   container.innerHTML = "";
@@ -418,10 +419,10 @@ function renderLogsList() {
 
   if (loggedDates.length === 0) {
     container.innerHTML = `
-      <div class="text-center py-12 text-zinc-500 glass-panel rounded-xl border border-dashed border-zinc-800">
-        <i class="fas fa-notes-medical text-3xl mb-3 text-zinc-600"></i>
-        <p>No symptoms logged yet.</p>
-        <p class="text-xs mt-1 text-zinc-600">Select any day on the calendar visualizer to log symptoms.</p>
+      <div class="text-center py-12 text-zinc-400 glass-panel rounded-2xl border border-dashed border-rose-200">
+        <i class="fas fa-heart text-2xl mb-2 text-rose-300"></i>
+        <p class="text-sm font-semibold">No logs saved yet.</p>
+        <p class="text-xs mt-1">Select a calendar date to start logging flow and symptoms.</p>
       </div>
     `;
     return;
@@ -430,46 +431,42 @@ function renderLogsList() {
   loggedDates.forEach(dateStr => {
     const log = state.logs[dateStr];
     const logDate = new Date(dateStr + "T00:00:00");
-    const formattedDate = logDate.toLocaleDateString("en-US", { weekday: "short", year: "numeric", month: "short", day: "numeric" });
-    
-    // Cycle metrics relative to this log date
-    const cycleInfo = calculateCyclePhase(logDate);
+    const formatted = logDate.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+    const phaseInfo = calculateCyclePhase(logDate);
 
-    const logCard = document.createElement("div");
-    logCard.className = "glass-panel p-4 rounded-xl border border-zinc-800 flex flex-col md:flex-row md:items-center justify-between gap-4";
-    
-    logCard.innerHTML = `
+    const card = document.createElement("div");
+    card.className = "glass-panel p-4 rounded-xl border border-rose-100/50 flex flex-col md:flex-row md:items-center justify-between gap-4";
+    card.innerHTML = `
       <div>
-        <div class="flex items-center gap-2">
-          <span class="font-bold text-white text-sm">${formattedDate}</span>
-          <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider ${cycleInfo.color} bg-white/5 border border-current">
-            ${cycleInfo.label}
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="font-bold text-zinc-700 text-sm">${formatted}</span>
+          <span class="px-2 py-0.5 rounded-full text-[9px] uppercase font-extrabold tracking-wider ${phaseInfo.color} bg-rose-50 border border-current">
+            ${phaseInfo.label}
           </span>
         </div>
-        <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-400">
-          <span>Flow: <strong class="text-zinc-200 capitalize">${log.flow}</strong></span>
-          <span>Pain: <strong class="text-zinc-200 capitalize">${log.pain}</strong></span>
-          <span>Mood: <strong class="text-zinc-200 capitalize">${log.mood}</strong></span>
+        <div class="mt-2 flex gap-4 text-xs text-zinc-500">
+          <span>Flow: <strong class="text-zinc-700 capitalize">${log.flow}</strong></span>
+          <span>Pain: <strong class="text-zinc-700 capitalize">${log.pain}</strong></span>
+          <span>Mood: <strong class="text-zinc-700 capitalize">${log.mood}</strong></span>
         </div>
-        ${log.notes ? `<div class="mt-2 text-xs text-zinc-500 bg-black/20 p-2 rounded italic border-l-2 border-rose-400">"${log.notes}"</div>` : ""}
+        ${log.notes ? `<div class="mt-2 text-xs text-zinc-500 bg-rose-50/40 p-2 rounded-lg italic border-l-2 border-rose-300">"${log.notes}"</div>` : ""}
       </div>
       <div>
-        <button class="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-all" onclick="deleteHistoryLog('${dateStr}')">
-          <i class="fas fa-trash-alt mr-1"></i> Delete
+        <button class="px-3 py-1.5 rounded-xl bg-white border border-rose-100 hover:bg-rose-50 text-xs text-rose-500 font-bold transition-all" onclick="deleteHistoryLog('${dateStr}')">
+          Remove
         </button>
       </div>
     `;
-    container.appendChild(logCard);
+    container.appendChild(card);
   });
 }
 
-// Global scope mapping for delete history buttons
 window.deleteHistoryLog = function(dateStr) {
-  if (confirm(`Are you sure you want to delete the log for ${dateStr}?`)) {
+  if (confirm(`Delete logs saved on ${dateStr}?`)) {
     delete state.logs[dateStr];
     saveLogs();
     renderLogsList();
-    showNotification("Log deleted", "info");
+    showNotification("Log removed successfully", "info");
   }
 };
 
@@ -480,380 +477,479 @@ function calculateTestingIntel() {
   if (!state.lastPeriodDate) return;
 
   const startDate = new Date(state.lastPeriodDate + "T00:00:00");
-  
-  // Cycle definitions
-  const cycleL = state.cycleLength;
-  
-  // Ovulation typically occurs 14 days before the next expected period
-  const ovulationOffset = cycleL - 14;
-  const estOvulationDate = new Date(startDate.getTime());
-  estOvulationDate.setDate(estOvulationDate.getDate() + ovulationOffset);
-  
-  // Test dates: Missed period (which matches cycleLength days from last period start)
-  const missedPeriodDate = new Date(startDate.getTime());
-  missedPeriodDate.setDate(missedPeriodDate.getDate() + cycleL);
-  
-  // Standard logic: Exactly 14 days after estimated ovulation
-  const optimalTestingDate = new Date(estOvulationDate.getTime());
-  optimalTestingDate.setDate(optimalTestingDate.getDate() + 14);
+  const L = state.cycleLength;
+  const ovulationOffset = L - 14;
 
-  // Early window (e.g. 10-12 days post ovulation)
-  const earlyTestingDate = new Date(estOvulationDate.getTime());
-  earlyTestingDate.setDate(earlyTestingDate.getDate() + 11);
+  const estOvulation = new Date(startDate.getTime());
+  estOvulation.setDate(estOvulation.getDate() + ovulationOffset);
 
-  // Dates formatting
+  const missedPeriod = new Date(startDate.getTime());
+  missedPeriod.setDate(missedPeriod.getDate() + L);
+
+  const optimalTesting = new Date(estOvulation.getTime());
+  optimalTesting.setDate(optimalTesting.getDate() + 14);
+
   const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
   
-  el.calcOvulationDate.innerText = estOvulationDate.toLocaleDateString('en-US', options);
-  el.calcMissedDate.innerText = missedPeriodDate.toLocaleDateString('en-US', options);
-  el.calcOptimalTestDate.innerText = optimalTestingDate.toLocaleDateString('en-US', options);
-  
-  // Calculate relative counters
+  el.calcOvulationDate.innerText = estOvulation.toLocaleDateString('en-US', options);
+  el.calcMissedDate.innerText = missedPeriod.toLocaleDateString('en-US', options);
+  el.calcOptimalTestDate.innerText = optimalTesting.toLocaleDateString('en-US', options);
+
   const today = new Date();
   today.setHours(0,0,0,0);
   
-  const diffTimeOptimal = optimalTestingDate.getTime() - today.getTime();
-  const diffDaysOptimal = Math.ceil(diffTimeOptimal / (1000 * 60 * 60 * 24));
-  
-  const diffTimeEarly = earlyTestingDate.getTime() - today.getTime();
-  const diffDaysEarly = Math.ceil(diffTimeEarly / (1000 * 60 * 60 * 24));
+  const diffDays = Math.ceil((optimalTesting.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-  // Render user alert countdowns
-  let statusHTML = "";
-  if (diffDaysOptimal > 0) {
-    statusHTML = `
-      <div class="p-4 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-200">
+  if (diffDays > 0) {
+    el.calcTestingCountdown.innerHTML = `
+      <div class="p-4 rounded-xl bg-rose-50 border border-rose-100 text-rose-700">
         <div class="flex items-center gap-2 mb-1">
           <i class="fas fa-clock text-lg"></i>
-          <span class="font-bold">Wait to Test: ${diffDaysOptimal} Days Remaining</span>
+          <span class="font-extrabold text-sm">Testing Schedule: Wait ${diffDays} Days</span>
         </div>
-        <p class="text-xs opacity-90">
-          Testing before <span class="font-semibold text-rose-300">${optimalTestingDate.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</span> may lead to a <strong>False Negative</strong> due to low hormonal concentrations in urine.
+        <p class="text-xs opacity-90 leading-relaxed">
+          Testing earlier than <span class="font-bold text-rose-600">${optimalTesting.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</span> runs the risk of a false negative as the hCG hormone concentration increases gradually.
         </p>
       </div>
     `;
   } else {
-    statusHTML = `
-      <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-200">
+    el.calcTestingCountdown.innerHTML = `
+      <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700">
         <div class="flex items-center gap-2 mb-1">
           <i class="fas fa-check-circle text-lg"></i>
-          <span class="font-bold">Optimal Testing Window Open</span>
+          <span class="font-extrabold text-sm">Testing Window Open</span>
         </div>
-        <p class="text-xs opacity-90">
-          You are past the threshold (missed period). A urine test conducted now will deliver high reliability (>99%).
+        <p class="text-xs opacity-90 leading-relaxed">
+          You are past the estimated missed period threshold. A urine pregnancy test conducted today will deliver peak reliability (>99%).
         </p>
       </div>
     `;
   }
-  
-  el.calcTestingCountdown.innerHTML = statusHTML;
 }
 
 /**
- * Tab 3: Gestational Timeline and scrub controller
+ * Tab 3: Gestational timeline & size scrubs
  */
 const milestones = {
   4: {
     title: "Week 4: Blastocyst Implantation",
     fruit: "Poppy Seed",
     fruitSize: "1-2 mm",
-    fruitIcon: "🍒", // Representing seed/tiny scale
-    babyText: "The fertilized egg, now a blastocyst, completes its journey down the fallopian tube and implants firmly into the vascular uterine wall. Rapid cell division splits the cells into the embryo and the placenta.",
-    bodyText: "High level progesterone and hCG production begins. You may experience baseline hormonal shifts like subtle implantation cramping, extreme fatigue, early breast tenderness, or light nausea triggers.",
-    babyGlow: "w-6 h-6 bg-rose-500/40 blur"
+    fruitIcon: "🍒",
+    babyText: "The fertilized egg completes its migration through the fallopian tube and implants securely into the nutrient-rich uterine wall.",
+    bodyText: "Progesterone and early hCG production begins. You may experience baseline hormonal signals: fatigue, sore breasts, or light cramping.",
+    babyGlow: "w-6 h-6 bg-rose-400/40 blur"
   },
   5: {
-    title: "Week 5: System Foundations",
+    title: "Week 5: Cellular Differentiation",
     fruit: "Apple Seed",
     fruitSize: "2-3 mm",
     fruitIcon: "🍎",
-    babyText: "The embryonic disc splits into three germ layers: the ectoderm (forms brain/nervous system), mesoderm (skeletal/circulatory system), and endoderm (lungs/organs). The primitive heart begins forming.",
-    bodyText: "Morning sickness symptoms may intensify as hCG levels double every 48 hours. Frequent urination becomes noticeable as your blood volume expands, and mood fluctuations occur due to rapid hormonal surges.",
-    babyGlow: "w-8 h-8 bg-rose-500/45 blur"
+    babyText: "Cells start arranging into three vital germ layers that will form the brain, heart tube, bones, and organs in subsequent weeks.",
+    bodyText: "HCG spikes quickly, triggering early morning sickness, food aversions, and fatigue. Your blood volume expands.",
+    babyGlow: "w-8 h-8 bg-rose-400/45 blur"
   },
   8: {
-    title: "Week 8: The Embryonic Heartbeat",
+    title: "Week 8: Primitive Heartbeat",
     fruit: "Raspberry",
     fruitSize: "1.6 cm",
     fruitIcon: "🍓",
-    babyText: "Fingers and toes are webbing, the heart tube beat consolidates at roughly 150 BPM (twice the adult rate), and neural pathways in the brain develop rapidly. Hands and feet start flexing.",
-    bodyText: "Your uterus is expanding to the size of a lemon, resting on your bladder. Estrogen peaks, which can trigger headaches, olfactory sensitivities, and skin changes. Physical signs are still hidden externally.",
-    babyGlow: "w-16 h-16 bg-rose-500/50 blur"
+    babyText: "Fingers are starting to bud, organs grow, and the heart tube consolidation creates a regular beat around 150 BPM.",
+    bodyText: "Your uterus expands to lemon size, pushing slightly against your bladder. Olfactory senses double, increasing nausea sensitivity.",
+    babyGlow: "w-14 h-14 bg-rose-400/50 blur"
   },
   12: {
-    title: "Week 12: Transition to Fetal Stage",
+    title: "Week 12: Officially a Fetus",
     fruit: "Lime",
     fruitSize: "5.4 cm",
     fruitIcon: "🍋",
-    babyText: "The embryonic stage concludes; the baby is officially a fetus. Organs are fully formed, limbs are complete with fingernails, and the kidneys begin filtering amniotic fluid. Refined movements occur.",
-    bodyText: "The placenta assumes principal responsibility for progesterone production. Morning sickness and fatigue typically begin to subside. Your uterus rises above the pelvic bone, reducing bladder pressure.",
-    babyGlow: "w-24 h-24 bg-rose-500/60 blur"
+    babyText: "Embryonic staging concludes. The fetus is fully formed with complete fingers, fingernails, and reflex actions.",
+    bodyText: "The placenta fully assumes hormone synthesis. Morning sickness begins to settle. Your uterus moves above the pelvic bone.",
+    babyGlow: "w-20 h-20 bg-rose-400/60 blur"
   }
 };
 
 function updateGestationalTimeline(week) {
   state.selectedWeek = parseInt(week);
-  
-  // Set slider value
   el.timelineSlider.value = week;
   el.weekDisplayBubble.innerText = `Week ${week}`;
-  
-  // Find closest milestone data
+
   const milKeys = Object.keys(milestones).map(Number);
-  // Find the exact or closest milestone lower or equal to selected week
-  let closestMil = milKeys[0];
+  let closest = milKeys[0];
   for (let k of milKeys) {
-    if (week >= k) {
-      closestMil = k;
-    }
+    if (week >= k) closest = k;
   }
-  
-  const m = milestones[closestMil];
-  
-  el.timelineMilestoneTitle.innerText = `${m.title} (Milestone View)`;
+
+  const m = milestones[closest];
+  el.timelineMilestoneTitle.innerText = `${m.title} (Milestone Details)`;
+  el.babyFruitIcon.innerText = m.fruitIcon;
   el.babyFruitName.innerText = m.fruit;
   el.babyFruitSize.innerText = m.fruitSize;
-  el.babyFruitIcon.innerText = m.fruitIcon;
   el.babyDevText.innerText = m.babyText;
   el.bodyDevText.innerText = m.bodyText;
-  
-  // Update structural render of visual scale
   el.fetalGlowGraphic.className = `rounded-full transition-all duration-300 ${m.babyGlow}`;
 }
 
 /**
- * Tab 4: Clinical Triage & Risk Matrix logic
+ * Tab 4: Self Care, Affirmations, and daily quote fetch
  */
-function evaluateTriageSymptoms() {
-  const symptomPelvic = document.querySelector('input[name="triage-pelvic"]:checked')?.value || "none";
-  const symptomBleeding = document.querySelector('input[name="triage-bleeding"]:checked')?.value || "none";
-  const symptomAmenorrhea = el.triageAmenorrhea.checked;
-  const symptomFever = el.triageFever.checked;
-  const symptomDizzy = el.triageDizzy.checked;
-  const triageNotes = el.triageNotes.value.trim();
+const fallbackAffirmations = [
+  "You are strong, capable, and doing a beautiful job caring for yourself.",
+  "Your body is a powerful, wise, and natural vessel of health and energy.",
+  "Embrace each phase of your body with patience, warmth, and self-love.",
+  "Every breath you take floods your muscles with calmness and healing.",
+  "Caring for your mind and body is the highest form of self-love."
+];
 
-  // Evaluate assessment
-  let riskLevel = "normal";
-  let alertTitle = "Routine Wellness Recommendations";
-  let alertDesc = "Your inputs show no high-risk clinical markers at this time. Standard preventative care, continuous hydration, tracking logs, and a regular schedule are advised.";
-  let alertInstructions = "Continue tracking your daily cycle dates, maintain a balanced diet rich in leafy greens and iron, and follow up with a routine wellness consultation with a gynecologist or practitioner annually.";
-  let alertClass = "bg-emerald-500/10 border-emerald-500/30 text-emerald-200";
+async function loadDailyAffirmation() {
+  el.affirmationLoader.classList.remove("hidden");
+  el.affirmationText.classList.add("opacity-20");
 
-  // Check severe rules (Red flags)
-  if (symptomPelvic === "severe" || symptomBleeding === "heavy") {
-    riskLevel = "red";
-    alertTitle = "CRITICAL: Urgent Medical Consultation Required";
-    alertDesc = "You have flagged severe pelvic pain or heavy bleeding. These symptoms can be clinical markers for ectopic pregnancy risks, miscarriage, or severe pelvic inflammatory pathology.";
-    alertInstructions = "<strong>IMMEDIATE ACTION REQUIRED:</strong> Please proceed to the nearest emergency obstetric care facility or contact your gynecologist immediately. Avoid self-treatment or waiting.";
-    alertClass = "bg-red-500/15 border-red-500/30 text-red-200";
-  } 
-  // Check moderate rules (Yellow flags)
-  else if (symptomPelvic === "mild" || symptomBleeding === "spotting" || symptomAmenorrhea || symptomFever || symptomDizzy) {
-    riskLevel = "yellow";
-    alertTitle = "WARNING: Professional Gynecologist Consultation Advised";
+  try {
+    // Dynamic fetch from type.fit free quotes API
+    const response = await fetch("https://type.fit/api/quotes");
+    if (!response.ok) throw new Error("API failed");
+    const data = await response.json();
     
-    let reasons = [];
-    if (symptomPelvic === "mild") reasons.push("persistent mild pain");
-    if (symptomBleeding === "spotting") reasons.push("unexplained light spotting");
-    if (symptomAmenorrhea) reasons.push("amenorrhea exceeding 90 consecutive days (potential hormone imbalance or PCOS)");
-    if (symptomFever) reasons.push("persistent fever over 100.4°F");
-    if (symptomDizzy) reasons.push("severe dizziness or fainting");
-
-    alertDesc = `You logged markers requiring clinical assessment: ${reasons.join(", ")}.`;
-    alertInstructions = "<strong>ACTION ADVISED:</strong> Schedule an appointment with a licensed gynaecologist/obstetrician within the next 48-72 hours. Present your logged cycle metrics and symptoms history during the consultation.";
-    alertClass = "bg-amber-500/10 border-amber-500/30 text-amber-200";
+    // Pick a random quote
+    const randIdx = Math.floor(Math.random() * data.length);
+    const quoteObj = data[randIdx];
+    
+    el.affirmationText.innerText = `"${quoteObj.text}"`;
+    el.affirmationAuthor.innerText = quoteObj.author ? `— ${quoteObj.author.split(",")[0]}` : "— Inspiration";
+  } catch (e) {
+    // Fallback if network failure / offline
+    const localRand = fallbackAffirmations[Math.floor(Math.random() * fallbackAffirmations.length)];
+    el.affirmationText.innerText = `"${localRand}"`;
+    el.affirmationAuthor.innerText = "— Aura Wellness";
+  } finally {
+    el.affirmationLoader.classList.add("hidden");
+    el.affirmationText.classList.remove("opacity-20");
   }
-
-  // Display results
-  el.triageResultsBox.className = `p-5 rounded-xl border ${alertClass} transition-all duration-300`;
-  el.triageResultsTitle.innerText = alertTitle;
-  el.triageResultsDesc.innerHTML = alertDesc;
-  el.triageResultsAction.innerHTML = alertInstructions;
-  el.triageResultsBox.classList.remove("hidden");
-
-  // Keep triage parameters on state for export
-  state.lastTriageAssessment = {
-    evaluatedAt: new Date().toLocaleString(),
-    riskLevel: riskLevel,
-    title: alertTitle,
-    desc: alertDesc.replace(/<[^>]*>/g, ''), // Strip tags for print
-    action: alertInstructions.replace(/<[^>]*>/g, ''),
-    symptoms: {
-      pelvicPain: symptomPelvic,
-      bleedingSpotting: symptomBleeding,
-      amenorrhea: symptomAmenorrhea,
-      fever: symptomFever,
-      dizziness: symptomDizzy
-    },
-    notes: triageNotes
-  };
-
-  // Scroll to results
-  el.triageResultsBox.scrollIntoView({ behavior: 'smooth' });
 }
 
 /**
- * Build and trigger a clean printable clinical consultation document
+ * Tab 5: Baby Names Explorer (Indian, Gen-Z, live API refresh)
  */
-function exportDoctorReport() {
-  if (!state.lastTriageAssessment) {
-    alert("Please complete the triage form and generate an assessment first.");
+function renderBabyNames() {
+  const container = el.namesGridContainer;
+  container.innerHTML = "";
+
+  const query = state.nameSearchFilter.toLowerCase();
+  const gender = state.nameGenderFilter;
+  const cat = state.nameCategoryFilter;
+
+  // Filter list
+  const filtered = state.namesList.filter(n => {
+    const matchesSearch = n.name.toLowerCase().includes(query) || n.meaning.toLowerCase().includes(query);
+    const matchesGender = gender === "all" || n.gender === gender || n.gender === "unisex";
+    const matchesCategory = cat === "all" || 
+      (cat === "indian" && n.tag.includes("Indian")) ||
+      (cat === "genz" && n.tag.includes("Gen-Z")) ||
+      (cat === "trending" && n.tag.includes("Trending"));
+    
+    return matchesSearch && matchesGender && matchesCategory;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full py-8 text-center text-zinc-400 text-xs italic">
+        No names matching filters found. Click the Refresh icon to fetch new global names!
+      </div>
+    `;
     return;
   }
 
-  const assessment = state.lastTriageAssessment;
-  
-  // Format HTML Template inside #print-report-area
-  const printArea = document.getElementById("print-report-area");
-  
-  // Gather user profiles
-  const profileDetails = `
-    <strong>Last Known Period Date:</strong> ${state.lastPeriodDate}<br/>
-    <strong>Average Cycle Duration:</strong> ${state.cycleLength} Days<br/>
-    <strong>Menstruation Window:</strong> ${state.periodLength} Days
-  `;
+  filtered.forEach(item => {
+    const isFav = state.favoriteNames.includes(item.name);
+    const card = document.createElement("div");
+    card.className = "p-4 rounded-xl bg-white border border-rose-100/50 flex flex-col justify-between shadow-sm relative";
+    
+    let genderColor = "text-rose-500 bg-rose-50 border-rose-100";
+    if (item.gender === "boy") genderColor = "text-blue-500 bg-blue-50 border-blue-100";
+    if (item.gender === "unisex") genderColor = "text-purple-500 bg-purple-50 border-purple-100";
 
-  // Process checklist representation
-  const s = assessment.symptoms;
-  const pelvicText = s.pelvicPain === "severe" ? "🔴 Severe Pain" : (s.pelvicPain === "mild" ? "🟡 Mild Pain" : "🟢 None");
-  const bleedText = s.bleedingSpotting === "heavy" ? "🔴 Heavy Bleeding" : (s.bleedingSpotting === "spotting" ? "🟡 Light Spotting" : "🟢 None");
-  
-  printArea.innerHTML = `
-    <div style="font-family: 'Plus Jakarta Sans', Arial, sans-serif; color: #000;">
-      <div style="border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
-        <div>
-          <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">AURA HEALTH</h1>
-          <p style="margin: 0; font-size: 12px; color: #555;">Clinical Symptom Triage Report</p>
+    card.innerHTML = `
+      <div>
+        <div class="flex justify-between items-start mb-1.5">
+          <span class="font-extrabold text-sm text-zinc-700 tracking-tight">${item.name}</span>
+          <div class="flex items-center gap-1.5">
+            <span class="px-2 py-0.5 rounded text-[8px] font-bold border ${genderColor} uppercase tracking-wide">${item.gender}</span>
+            <button class="text-xs hover:scale-110 transition-transform ${isFav ? 'text-rose-500' : 'text-zinc-300'}" onclick="toggleFavoriteName('${item.name}')">
+              <i class="fa${isFav ? 's' : 'r'} fa-heart"></i>
+            </button>
+          </div>
         </div>
-        <div style="text-align: right; font-size: 11px; color: #555;">
-          <strong>Date Generated:</strong> ${assessment.evaluatedAt}<br/>
-          <strong>Security Protocol:</strong> 100% Client-Side Private Document
-        </div>
+        <p class="text-[10px] text-zinc-400 font-semibold uppercase">${item.origin} • ${item.tag || 'Global'}</p>
+        <p class="text-[11px] text-zinc-500 mt-1.5 italic leading-relaxed">"${item.meaning}"</p>
       </div>
+    `;
+    container.appendChild(card);
+  });
 
-      <div class="clinical-box">
-        <h3>1. PATIENT CYCLE PARAMETERS</h3>
-        <p>${profileDetails}</p>
-      </div>
-
-      <div class="clinical-box">
-        <h3>2. SYMPTOM CHECKLIST ASSESSMENT</h3>
-        <table>
-          <thead>
-            <tr>
-              <th style="width: 50%;">Symptom Evaluated</th>
-              <th style="text-align: right; width: 50%;">Reported State</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Severe/Sharp Pelvic Pain</td>
-              <td style="text-align: right;"><strong>${pelvicText}</strong></td>
-            </tr>
-            <tr>
-              <td>Persistent Spotting or Heavy Bleeding</td>
-              <td style="text-align: right;"><strong>${bleedText}</strong></td>
-            </tr>
-            <tr>
-              <td>Amenorrhea Exceeding 90 Days</td>
-              <td style="text-align: right;"><strong>${s.amenorrhea ? "🔴 Yes" : "🟢 No"}</strong></td>
-            </tr>
-            <tr>
-              <td>Persistent Fever (>100.4°F)</td>
-              <td style="text-align: right;"><strong>${s.fever ? "🔴 Yes" : "🟢 No"}</strong></td>
-            </tr>
-            <tr>
-              <td>Severe Dizziness or Fainting</td>
-              <td style="text-align: right;"><strong>${s.dizziness ? "🔴 Yes" : "🟢 No"}</strong></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="clinical-box" style="border-left: 4px solid ${assessment.riskLevel === 'red' ? '#ef4444' : (assessment.riskLevel === 'yellow' ? '#f59e0b' : '#10b981')} !important;">
-        <h3>3. RISK ASSESSMENT & TRIAGE RECOMMENDATION</h3>
-        <p><strong>Clinical Risk Tier:</strong> <span style="text-transform: uppercase; font-weight: bold; color: ${assessment.riskLevel === 'red' ? '#ef4444' : (assessment.riskLevel === 'yellow' ? '#f59e0b' : '#10b981')}">${assessment.riskLevel}</span></p>
-        <p><strong>Assessment:</strong> ${assessment.desc}</p>
-        <p><strong>Physician Action Plan:</strong> ${assessment.action}</p>
-      </div>
-
-      ${assessment.notes ? `
-      <div class="clinical-box">
-        <h3>4. PATIENT-INPUTTED CLINICAL NOTES</h3>
-        <p style="font-style: italic; white-space: pre-wrap;">"${assessment.notes}"</p>
-      </div>
-      ` : ""}
-
-      <div style="margin-top: 40px; border-top: 1px solid #ddd; padding-top: 10px; font-size: 10px; color: #888; text-align: center;">
-        Disclaimer: This checklist utilizes mathematical algorithms and screening logic for clinical guidelines and does not substitute for emergency medical care or diagnosis.
-      </div>
-    </div>
-  `;
-
-  // Trigger browser print interface
-  window.print();
+  renderFavoriteNamesSidebar();
 }
 
 /**
- * Handle purging all data from local storage
+ * Live Fetch of Trending baby names using randomuser API
+ */
+async function fetchTrendingGlobalNames() {
+  el.nameRefreshIcon.classList.add("fa-spin");
+  showNotification("Fetching live global trending names...", "info");
+
+  try {
+    // Queries random user generator for 12 random names with multiple nationalities (India, US, France, Spain, Canada)
+    const response = await fetch("https://randomuser.me/api/?results=12&nat=in,us,gb,fr,es,ca");
+    if (!response.ok) throw new Error();
+    const data = await response.json();
+
+    const countryMap = {
+      IN: "Indian", US: "American", GB: "British", FR: "French", ES: "Spanish", CA: "Canadian"
+    };
+
+    const fetchedNames = data.results.map(r => {
+      const nat = r.nat;
+      const origin = countryMap[nat] || "Global";
+      const name = r.name.first;
+      const gender = r.gender;
+      
+      return {
+        name: name,
+        gender: gender,
+        origin: origin,
+        meaning: `Live trending name; popular choice in ${origin} census records.`,
+        tag: "Global Trending"
+      };
+    });
+
+    // Merge fetched names avoiding duplicate names
+    const existingNames = new Set(state.namesList.map(n => n.name.toLowerCase()));
+    const newItems = fetchedNames.filter(n => !existingNames.has(n.name.toLowerCase()));
+
+    state.namesList = [...newItems, ...state.namesList];
+    renderBabyNames();
+    showNotification(`Added ${newItems.length} live trending names!`, "success");
+  } catch (e) {
+    showNotification("Failed to fetch live names. Working offline.", "info");
+  } finally {
+    el.nameRefreshIcon.classList.remove("fa-spin");
+  }
+}
+
+window.toggleFavoriteName = function(nameStr) {
+  const idx = state.favoriteNames.indexOf(nameStr);
+  if (idx > -1) {
+    state.favoriteNames.splice(idx, 1);
+    showNotification("Removed from favorites", "info");
+  } else {
+    state.favoriteNames.push(nameStr);
+    showNotification("Saved to favorites!", "success");
+  }
+  saveFavorites();
+  renderBabyNames();
+};
+
+function renderFavoriteNamesSidebar() {
+  const sidebar = el.favoriteNamesContainer;
+  sidebar.innerHTML = "";
+
+  if (state.favoriteNames.length === 0) {
+    sidebar.innerHTML = `
+      <p class="text-[10px] text-zinc-400 italic">Click the heart icon on any name card to favorite.</p>
+    `;
+    return;
+  }
+
+  state.favoriteNames.forEach(name => {
+    // Find name details
+    const nameDetails = state.namesList.find(n => n.name === name) || { gender: 'unisex' };
+    let color = "text-rose-500 bg-rose-50";
+    if (nameDetails.gender === 'boy') color = "text-blue-500 bg-blue-50";
+    if (nameDetails.gender === 'unisex') color = "text-purple-500 bg-purple-50";
+
+    const badge = document.createElement("div");
+    badge.className = `flex justify-between items-center px-3 py-1.5 rounded-lg border border-rose-100/50 bg-white shadow-sm text-xs font-semibold text-zinc-700`;
+    badge.innerHTML = `
+      <span class="flex items-center gap-1.5">
+        <span class="w-1.5 h-1.5 rounded-full ${color.split(' ')[0]}"></span> ${name}
+      </span>
+      <button class="text-zinc-300 hover:text-red-400 transition-colors" onclick="toggleFavoriteName('${name}')">
+        <i class="fas fa-times-circle"></i>
+      </button>
+    `;
+    sidebar.appendChild(badge);
+  });
+}
+
+/**
+ * Tab 6: Guided Breathe Timer for pain and anxiety relief
+ */
+function selectBreatheTechnique(techId) {
+  state.breatheTechnique = techId;
+  
+  // Update buttons classes
+  document.querySelectorAll(".breathe-type-btn").forEach(btn => {
+    const isCurrent = btn.getAttribute("data-type") === techId;
+    if (isCurrent) {
+      btn.classList.add("bg-rose-500", "text-white");
+      btn.classList.remove("bg-white", "text-zinc-500", "border-rose-100");
+    } else {
+      btn.classList.remove("bg-rose-500", "text-white");
+      btn.classList.add("bg-white", "text-zinc-500", "border-rose-100");
+    }
+  });
+
+  if (techId === "box") {
+    state.breatheRatio = { inhale: 4, hold1: 4, exhale: 4, hold2: 4 };
+    el.breatheTechniqueLabel.innerText = "Box Breathing (4-4-4-4 Ratio)";
+    el.breatheTechniqueDesc.innerText = "Best for sharp cycle pain relief, settling panic or anxiety, and centering focus.";
+  } else {
+    state.breatheRatio = { inhale: 4, hold1: 7, exhale: 8, hold2: 0 };
+    el.breatheTechniqueLabel.innerText = "Relaxation Breathing (4-7-8 Ratio)";
+    el.breatheTechniqueDesc.innerText = "Best for deep nervous system calming, physical decompression, and preparing for sleep.";
+  }
+
+  resetBreatheTimer();
+}
+
+function resetBreatheTimer() {
+  clearInterval(state.breatheInterval);
+  state.breatheActive = false;
+  state.breathePhase = "Inhale";
+  state.breatheTimer = state.breatheRatio.inhale;
+  el.breatheStateLabel.innerText = "Inhale";
+  el.breatheCountdown.innerText = state.breatheTimer;
+  el.breatheCircleGraphic.style.transform = "scale(1)";
+  el.startBreatheBtn.innerText = "Start Breathing Guide";
+  el.startBreatheBtn.className = "w-full py-3 rounded-xl bg-rose-500 text-white font-bold text-sm shadow-md transition-all hover:bg-rose-600";
+}
+
+function toggleBreatheTimer() {
+  if (state.breatheActive) {
+    // Pause
+    clearInterval(state.breatheInterval);
+    state.breatheActive = false;
+    el.startBreatheBtn.innerText = "Resume Guide";
+    el.startBreatheBtn.className = "w-full py-3 rounded-xl bg-rose-500 text-white font-bold text-sm shadow-md transition-all hover:bg-rose-600";
+  } else {
+    // Start
+    state.breatheActive = true;
+    el.startBreatheBtn.innerText = "Pause Guide";
+    el.startBreatheBtn.className = "w-full py-3 rounded-xl bg-zinc-700 text-white font-bold text-sm shadow-md transition-all hover:bg-zinc-800";
+    
+    // Scale mapping on start
+    animateBreatheCircle();
+
+    state.breatheInterval = setInterval(() => {
+      state.breatheTimer--;
+
+      if (state.breatheTimer <= 0) {
+        // Phase transition
+        switch (state.breathePhase) {
+          case "Inhale":
+            if (state.breatheRatio.hold1 > 0) {
+              state.breathePhase = "Hold";
+              state.breatheTimer = state.breatheRatio.hold1;
+            } else {
+              state.breathePhase = "Exhale";
+              state.breatheTimer = state.breatheRatio.exhale;
+            }
+            break;
+          case "Hold":
+            // Check if transition to Exhale
+            state.breathePhase = "Exhale";
+            state.breatheTimer = state.breatheRatio.exhale;
+            break;
+          case "Exhale":
+            if (state.breatheRatio.hold2 > 0) {
+              state.breathePhase = "Rest";
+              state.breatheTimer = state.breatheRatio.hold2;
+            } else {
+              state.breathePhase = "Inhale";
+              state.breatheTimer = state.breatheRatio.inhale;
+            }
+            break;
+          case "Rest":
+            state.breathePhase = "Inhale";
+            state.breatheTimer = state.breatheRatio.inhale;
+            break;
+        }
+
+        animateBreatheCircle();
+      }
+
+      el.breatheStateLabel.innerText = state.breathePhase;
+      el.breatheCountdown.innerText = state.breatheTimer;
+    }, 1000);
+  }
+}
+
+function animateBreatheCircle() {
+  const circle = el.breatheCircleGraphic;
+  
+  if (state.breathePhase === "Inhale") {
+    // Smoothly scale up
+    circle.style.transform = "scale(1.75)";
+    circle.style.background = "radial-gradient(circle, rgba(251, 113, 133, 0.4) 0%, rgba(244, 63, 94, 0.25) 100%)";
+    circle.style.borderColor = "rgba(244, 63, 94, 0.5)";
+  } else if (state.breathePhase === "Exhale") {
+    // Smoothly scale down
+    circle.style.transform = "scale(1)";
+    circle.style.background = "radial-gradient(circle, rgba(251, 113, 133, 0.2) 0%, rgba(244, 63, 94, 0.1) 100%)";
+    circle.style.borderColor = "rgba(244, 63, 94, 0.2)";
+  } else {
+    // Keep scale during hold
+    circle.style.background = "radial-gradient(circle, rgba(192, 132, 252, 0.3) 0%, rgba(168, 85, 247, 0.15) 100%)";
+    circle.style.borderColor = "rgba(168, 85, 247, 0.4)";
+  }
+}
+
+/**
+ * Data management & Purge settings
  */
 function purgeAllMyData() {
-  if (confirm("WARNING: This will permanently delete all logged cycle history, profile parameters, and clinical logs. This action is irreversible. Proceed?")) {
-    localStorage.removeItem("aura_profile");
-    localStorage.removeItem("aura_logs");
-    
-    // Reset State
+  if (confirm("WARNING: This will permanently delete all cycle configurations, logged symptoms, and favorited baby names. This action cannot be undone. Proceed?")) {
+    localStorage.removeItem("aura_profile_v2");
+    localStorage.removeItem("aura_logs_v2");
+    localStorage.removeItem("aura_favorite_names");
+
     state.logs = {};
+    state.favoriteNames = [];
     setupDefaults();
     saveProfile();
-    
-    // Refresh components
+
     renderCalendar();
     calculateTestingIntel();
+    renderBabyNames();
+    loadDailyAffirmation();
     renderLogsList();
-    
-    // Clear inputs in profile
+
     el.inputLastPeriod.value = state.lastPeriodDate;
     el.inputCycleLength.value = state.cycleLength;
     el.inputPeriodLength.value = state.periodLength;
 
-    // Reset Triage results
-    el.triageResultsBox.classList.add("hidden");
-    document.querySelectorAll("input[name='triage-pelvic']").forEach(r => r.checked = r.value === 'none');
-    document.querySelectorAll("input[name='triage-bleeding']").forEach(r => r.checked = r.value === 'none');
-    el.triageAmenorrhea.checked = false;
-    el.triageFever.checked = false;
-    el.triageDizzy.checked = false;
-    el.triageNotes.value = "";
-    state.lastTriageAssessment = null;
-
-    showNotification("All personal data has been securely purged.", "info");
+    showNotification("All personal data has been securely deleted.", "info");
   }
 }
 
-/**
- * Floating temporary toast notifications for action feedback
- */
 function showNotification(msg, type = "success") {
   const container = document.getElementById("toast-container");
   if (!container) return;
 
   const toast = document.createElement("div");
-  let bg = "bg-rose-600";
-  if (type === "info") bg = "bg-purple-600";
-  if (type === "success") bg = "bg-emerald-600";
+  let bg = "bg-rose-500 text-white";
+  if (type === "info") bg = "bg-purple-600 text-white";
+  if (type === "success") bg = "bg-rose-600 text-white";
 
-  toast.className = `${bg} text-white text-xs md:text-sm font-semibold px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-2 opacity-0 transition-all duration-300`;
+  toast.className = `${bg} text-xs font-bold px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-2 opacity-0 transition-all duration-300`;
   toast.innerHTML = `<i class="fas fa-info-circle"></i> <span>${msg}</span>`;
 
   container.appendChild(toast);
 
-  // Trigger animation frame
   setTimeout(() => {
     toast.classList.remove("translate-y-2", "opacity-0");
   }, 10);
 
-  // Clear timeout
   setTimeout(() => {
     toast.classList.add("translate-y-2", "opacity-0");
     setTimeout(() => {
@@ -862,9 +958,6 @@ function showNotification(msg, type = "success") {
   }, 3500);
 }
 
-/**
- * Handle manual update of settings
- */
 function updateSettings(e) {
   e.preventDefault();
   
@@ -873,7 +966,7 @@ function updateSettings(e) {
   const rawPeriod = parseInt(el.inputPeriodLength.value);
 
   if (!rawDate) {
-    showNotification("Please select a valid date.", "info");
+    showNotification("Select a valid period start date.", "info");
     return;
   }
   if (isNaN(rawCycle) || rawCycle < 15 || rawCycle > 60) {
@@ -891,16 +984,12 @@ function updateSettings(e) {
 
   saveProfile();
   
-  // Refresh views
   renderCalendar();
   calculateTestingIntel();
   
-  showNotification("Cycle Settings Updated Successfully", "success");
+  showNotification("Settings saved successfully!", "success");
 }
 
-/**
- * Handle month-to-month calendar navigation
- */
 function navigateMonth(offset) {
   state.currentMonth += offset;
   if (state.currentMonth < 0) {
@@ -913,11 +1002,18 @@ function navigateMonth(offset) {
   renderCalendar();
 }
 
+const PHASE_CLASSES = {
+  menstrual: "phase-menstrual text-red-700 border-red-300",
+  follicular: "phase-follicular text-blue-700 border-blue-300",
+  ovulatory: "phase-ovulatory text-rose-700 border-rose-300",
+  luteal: "phase-luteal text-purple-700 border-purple-300",
+  none: "border-zinc-100 text-zinc-400"
+};
+
 /**
- * Initialize Event Listeners and load system properties
+ * DOM Ready Initializer
  */
 document.addEventListener("DOMContentLoaded", () => {
-  // Bind Elements
   el = {
     calendarMonthTitle: document.getElementById("calendar-month-title"),
     calendarGrid: document.getElementById("calendar-grid"),
@@ -963,18 +1059,30 @@ document.addEventListener("DOMContentLoaded", () => {
     bodyDevText: document.getElementById("body-dev-text"),
     fetalGlowGraphic: document.getElementById("fetal-glow-graphic"),
     
-    // Triage elements
-    triageForm: document.getElementById("triage-form"),
-    triageAmenorrhea: document.getElementById("triage-amenorrhea"),
-    triageFever: document.getElementById("triage-fever"),
-    triageDizzy: document.getElementById("triage-dizzy"),
-    triageNotes: document.getElementById("triage-notes"),
-    triageResultsBox: document.getElementById("triage-results-box"),
-    triageResultsTitle: document.getElementById("triage-results-title"),
-    triageResultsDesc: document.getElementById("triage-results-desc"),
-    triageResultsAction: document.getElementById("triage-results-action"),
-    exportReportBtn: document.getElementById("export-report-btn"),
-    
+    // Affirmations
+    affirmationText: document.getElementById("affirmation-text"),
+    affirmationAuthor: document.getElementById("affirmation-author"),
+    affirmationLoader: document.getElementById("affirmation-loader"),
+    refreshAffirmationBtn: document.getElementById("refresh-affirmation-btn"),
+
+    // Baby Names
+    namesGridContainer: document.getElementById("names-grid-container"),
+    favoriteNamesContainer: document.getElementById("favorite-names-container"),
+    nameInputSearch: document.getElementById("name-input-search"),
+    nameSelectGender: document.getElementById("name-select-gender"),
+    nameSelectCategory: document.getElementById("name-select-category"),
+    nameRefreshBtn: document.getElementById("name-refresh-btn"),
+    nameRefreshIcon: document.getElementById("name-refresh-icon"),
+
+    // Breathe Timer
+    breatheCircleGraphic: document.getElementById("breathe-circle-graphic"),
+    breatheStateLabel: document.getElementById("breathe-state-label"),
+    breatheCountdown: document.getElementById("breathe-countdown"),
+    breatheTechniqueLabel: document.getElementById("breathe-technique-label"),
+    breatheTechniqueDesc: document.getElementById("breathe-technique-desc"),
+    startBreatheBtn: document.getElementById("start-breathe-btn"),
+    resetBreatheBtn: document.getElementById("reset-breathe-btn"),
+
     // History tab
     logsListContainer: document.getElementById("logs-list-container"),
     
@@ -982,45 +1090,66 @@ document.addEventListener("DOMContentLoaded", () => {
     purgeDataBtn: document.getElementById("purge-data-btn")
   };
 
-  // Load state from localStorage
   loadData();
 
-  // Populate configuration forms
+  // Populate config
   el.inputLastPeriod.value = state.lastPeriodDate;
   el.inputCycleLength.value = state.cycleLength;
   el.inputPeriodLength.value = state.periodLength;
 
-  // Bind general event listeners
+  // Navigation binders
   document.querySelectorAll(".nav-tab-btn").forEach(btn => {
     btn.addEventListener("click", () => {
-      const tabId = btn.getAttribute("data-tab");
-      switchTab(tabId);
+      switchTab(btn.getAttribute("data-tab"));
     });
   });
 
-  // Calendar listeners
+  // Calendar binders
   el.prevMonthBtn.addEventListener("click", () => navigateMonth(-1));
   el.nextMonthBtn.addEventListener("click", () => navigateMonth(1));
   el.saveLogBtn.addEventListener("click", saveSymptomLog);
   el.deleteLogBtn.addEventListener("click", deleteSymptomLog);
   el.settingsForm.addEventListener("submit", updateSettings);
 
-  // Timeline slider listener
+  // Timeline slider
   el.timelineSlider.addEventListener("input", (e) => {
     updateGestationalTimeline(e.target.value);
   });
 
-  // Triage logic listeners
-  el.triageForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    evaluateTriageSymptoms();
-  });
-  el.exportReportBtn.addEventListener("click", exportDoctorReport);
+  // Affirmation refresh
+  el.refreshAffirmationBtn.addEventListener("click", loadDailyAffirmation);
 
-  // Purge button listener
+  // Baby Names binders
+  el.nameInputSearch.addEventListener("input", (e) => {
+    state.nameSearchFilter = e.target.value;
+    renderBabyNames();
+  });
+  el.nameSelectGender.addEventListener("change", (e) => {
+    state.nameGenderFilter = e.target.value;
+    renderBabyNames();
+  });
+  el.nameSelectCategory.addEventListener("change", (e) => {
+    state.nameCategoryFilter = e.target.value;
+    renderBabyNames();
+  });
+  el.nameRefreshBtn.addEventListener("click", fetchTrendingGlobalNames);
+
+  // Breathe timer binders
+  document.querySelectorAll(".breathe-type-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      selectBreatheTechnique(btn.getAttribute("data-type"));
+    });
+  });
+  el.startBreatheBtn.addEventListener("click", toggleBreatheTimer);
+  el.resetBreatheBtn.addEventListener("click", resetBreatheTimer);
+
+  // Purge
   el.purgeDataBtn.addEventListener("click", purgeAllMyData);
 
-  // Initial UI Render
+  // Initial loads
   renderCalendar();
   updateGestationalTimeline(state.selectedWeek);
+  selectBreatheTechnique("box");
+  loadDailyAffirmation();
+  renderBabyNames();
 });

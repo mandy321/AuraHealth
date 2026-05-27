@@ -1,85 +1,72 @@
-# Aura Health: Private Cycle & Pregnancy Companion SPA
+# Aura Health: Gentle Cycle & Baby Companion SPA
 
-A standalone, secure, client-side Single Page Application (SPA) designed to track menstrual cycles, visualize fertility probability windows, calculate optimal pregnancy testing schedules, track early gestational milestones, and evaluate clinical symptoms for medical consultations.
+A standalone, privacy-first client-side Single Page Application (SPA) designed to track menstrual cycles, plan baby development stages, explore modern baby names, practice mindful breathing, and learn about postpartum health.
 
-Designed with a modern glassmorphic visual aesthetic and high security in mind, the application operates entirely within the user's browser, transmitting zero data over the internet.
+This application is built with a soft, warm pastel spa aesthetic (cream, blush rose, and lavender) designed to be highly welcoming and comforting to women and new mothers.
 
 ---
 
 ## 🌟 Core Features
 
 1. **Fertility & Cycle Visualizer**
-   - Interactive calendar mapped dynamically to user-defined cycle parameters (Last period date, cycle duration, period length).
-   - Zone-based phase calculations (Menstrual, Follicular, Ovulatory, Luteal) along with estimated pregnancy probability curves.
-   - Dynamic logging interface allows recording of symptoms (flow rate, cramping pain level, general mood, and text notes) on any specific calendar date.
+   - Interactive calendar mapped dynamically to user-defined cycle parameters (Last period date, typical cycle length, and menstruation days).
+   - Color-coded phase overlays (Menstrual, Follicular, Ovulatory Peak, and Luteal) detailing hormone characteristics.
+   - Private daily logs to record flow rate, cramps, general feeling, and journal notes.
 
-2. **Pregnancy Testing Kit Intelligence**
-   - Automatically computes optimal pregnancy testing windows (starting exactly 14 days after estimated ovulation or on the first day of a missed period).
-   - Educational resource detail explaining the physiological mechanics of the **hCG (human Chorionic Gonadotropin)** hormone, detection thresholds, and why early testing triggers false negatives.
-   - Step-by-step clinical guidance for conducting tests, morning tracking, and reading faint lines.
+2. **Pregnancy Testing & Milestones**
+   - Automatically computes optimal pregnancy testing windows and details hCG hormone threshold behaviors.
+   - Interactive milestone slider tracking embryonic and fetal growth from Week 1 to Week 12, with size comparisons to fruits (Poppy Seed, Apple Seed, Raspberry, Lime).
 
-3. **Gestational Timeline & Body Changes**
-   - Interactive slider tracking pregnancy milestones from Week 1 to Week 12.
-   - Side-by-side comparative views showing **Fetal Development** (fruit-scale representations, anatomical growth) vs. **Maternal Body Transformations** (placenta hormones, fatigue triggers, bladder pressure shifts).
+3. **Baby Names Explorer**
+   - Curated database of modern Indian, Gen-Z, and global trending baby names with origins and meanings.
+   - Dynamic search filters by classification (Girl, Boy, Unisex) and origin style.
+   - **Live API Fetch Refresh**: Click the sync icon to fetch live, real-world trending names globally using the `randomuser.me` API.
+   - "Favorites Wishlist" saved directly to browser LocalStorage.
 
-4. **Clinical Symptom Triage Engine**
-   - A health screening questionnaire tracking red flag symptoms (severe pelvic pain, heavy vaginal bleeding, amenorrhea exceeding 90 consecutive days, fever, and severe dizziness).
-   - Automated conditional diagnostic evaluation separating outcomes into Critical Red Alerts, Yellow Warning, or Green/Routine.
-   - **Print/Export Consultation Report** feature that compiles all symptoms and cycle statistics into a clean, professional clinical print template for gynecologist appointments.
+4. **Quotes & Self-Care Hub**
+   - **Daily Affirmation Fetcher**: Automatically pulls positive, encouraging quotes from public endpoints, with robust offline fallback libraries.
+   - Structured wellness guides covering comfort tea drinks, heat compress methods, and sleep hygiene.
 
-5. **Technical & Privacy Architecture**
-   - **100% Client-Side execution**: Zero database or server API connections.
-   - **LocalStorage integration**: All profiles and symptom histories are stored in the browser's local sandbox cache.
-   - **Data Purging**: A one-click "Purge All My Data" mechanism that safely deletes all logs from LocalStorage instantly.
+5. **Mindful Breathing Timer**
+   - Guided breath visualizer designed for menstrual cramps relief and pregnancy relaxation.
+   - Supports **Box Breathing (4-4-4-4)** and **4-7-8 Relaxation** ratios with interactive growing/shrinking visual elements.
+
+6. **Postpartum & Infant Care Guide**
+   - Essential wellness information covering physical recovery (involution, lochia, sitz baths), emotional changes (baby blues vs PPD), and newborn nutrition.
+   - Clear checklists for **DO's** (rest, nutrient-dense diet) and **DON'Ts** (heavy lifting, premature workouts).
+   - Clinical Medical Disclaimer urging consultation with a gynecologist or pediatrician for medical issues.
+
+7. **Technical & Privacy Architecture**
+   - 100% client-side logic with zero external database dependencies.
+   - All profile data and favorited names live in browser LocalStorage.
+   - Safety control to purge all local data with a single click.
 
 ---
 
 ## 🛠️ Technology Stack
-* **Markup**: HTML5 (Semantic elements)
-* **Styling**: Tailwind CSS (Utility classes & custom configurations via embedded CDN script)
-* **Logic**: Vanilla ES6 JavaScript (LocalStorage APIs, Gregorian date calculations, DOM manipulation)
-* **Custom Styles**: Vanilla CSS (`styles.css` for ambient glow canvas animations, custom slider layouts, and print overrides)
+* **Markup**: HTML5
+* **Styling**: Tailwind CSS (Utility classes via CDN) + Custom CSS (`styles.css` for pastel glow animations, circle expansions, and scrollbars)
+* **Logic**: Vanilla ES6 JavaScript (Fetch API, LocalStorage persistence, DOM timers)
 * **Icons**: FontAwesome v6.4
 
 ---
 
-## 🚀 Running Locally
+## 🚀 Running and Hosting
 
-Since the application consists entirely of static assets, you can run it without any build tools.
-
-### Option 1: Direct Execution
-Simply open `index.html` in any web browser.
-
-### Option 2: Local Python Server (Recommended)
-Navigate to the root directory in your terminal and run:
+### Local Execution
+To run locally, navigate to the folder and run:
 ```bash
-python3 -m http.server 8000
+python3 -m http.server 8080
 ```
-Then visit: [http://localhost:8000](http://localhost:8000)
+Then visit: [http://localhost:8080](http://localhost:8080)
 
-### Option 3: Node.js (Static Server)
-```bash
-npx serve .
-```
-
----
-
-## 📦 Static Deployment on GitHub Pages
-
-Hosting this SPA on GitHub Pages is straightforward and takes less than a minute:
-
-1. **Initialize Git and Push to GitHub**:
+### GitHub Pages Deployment
+1. Initialize Git, commit, and push commits to your repository:
    ```bash
    git init
    git add .
-   git commit -m "Initial commit of Aura Health SPA"
+   git commit -m "Initial commit of Aura Health pastel SPA"
    git remote add origin https://github.com/yourusername/aura-health.git
-   git branch -M main
    git push -u origin main
    ```
-2. **Configure Pages**:
-   - Go to your repository on GitHub.
-   - Navigate to **Settings** > **Pages** tab.
-   - Under **Build and deployment**, select **Deploy from a branch**.
-   - Under **Branch**, select `main` (or the root folder `/`) and click **Save**.
-   - Your site will be live at `https://yourusername.github.io/aura-health/` within a couple of minutes!
+2. Enable Pages in **Settings** > **Pages** of your GitHub repository. Select `main` branch and `/` root folder.
