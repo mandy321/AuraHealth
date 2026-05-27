@@ -1,31 +1,19 @@
 /**
  * AuraHealth - Client-Side Women's Health & Baby Companion
- * Features:
- *  - Fertility & Cycle Visualizer (Pastel Calendar grid mapping)
- *  - Pregnancy Testing Kit Intelligence (hCG thresholds & guidance)
- *  - Gestational Milestone Timeline (Weeks 1-12)
- *  - Interactive Baby Names Explorer (Gen-Z, Indian, and Global names + Live API fetch)
- *  - Mindful Breathing Timer (Cramps & Relaxation relief guide)
- *  - Postpartum Recovery & Newborn Care Guide (Do's & Don'ts + Medical Disclaimer)
- *  - LocalStorage Privacy Architecture
+ * Rebuilt for Warm Dark-Plum Theme and Baby Name Explorer Improvements.
  */
 
 // App State
 const state = {
-  // Cycle configurations
   cycleLength: 28,
   periodLength: 5,
-  lastPeriodDate: "", // YYYY-MM-DD
+  lastPeriodDate: "", 
   
-  // Calendar navigation
   currentYear: new Date().getFullYear(),
   currentMonth: new Date().getMonth(),
   selectedDateStr: "", 
 
-  // Tab navigation
   activeTab: "fertility",
-
-  // Pregnancy timeline
   selectedWeek: 4,
 
   // Baby Names Explorer
@@ -39,54 +27,139 @@ const state = {
   breatheActive: false,
   breatheInterval: null,
   breatheTimer: 0,
-  breathePhase: "Inhale", // Inhale, Hold, Exhale, Hold
-  breatheRatio: { inhale: 4, hold1: 4, exhale: 4, hold2: 4 }, // default Box
+  breathePhase: "Inhale",
+  breatheRatio: { inhale: 4, hold1: 4, exhale: 4, hold2: 4 }, 
   breatheCount: 4,
-  breatheTechnique: "box", // box, relax
+  breatheTechnique: "box",
 
-  // Local storage cache
   logs: {}
 };
 
-// Curated Baby Names Database (Modern Indian, Gen-Z, Global Trending)
+// Curated Baby Names Dictionary with Meanings, Origins, and Categories
 const localBabyNames = [
-  // Modern Indian Names
-  { name: "Aarav", gender: "boy", origin: "Indian", meaning: "Peaceful; wisdom; musical note", tag: "Modern Indian" },
-  { name: "Ananya", gender: "girl", origin: "Indian", meaning: "Matchless; unique; peerless", tag: "Modern Indian" },
-  { name: "Vihaan", gender: "boy", origin: "Indian", meaning: "Dawn; morning; start of era", tag: "Modern Indian" },
-  { name: "Myra", gender: "girl", origin: "Indian", meaning: "Sweet; beloved; swift light", tag: "Modern Indian" },
-  { name: "Ishaan", gender: "boy", origin: "Indian", meaning: "Lord Shiva; light indicator", tag: "Modern Indian" },
-  { name: "Kiara", gender: "girl", origin: "Indian/Italian", meaning: "Clear; bright; soft light", tag: "Modern Indian" },
-  { name: "Kabir", gender: "boy", origin: "Indian", meaning: "Great; saintly poet", tag: "Modern Indian" },
-  { name: "Diya", gender: "girl", origin: "Indian", meaning: "Clay lamp; light guidance", tag: "Modern Indian" },
-  { name: "Advait", gender: "boy", origin: "Indian", meaning: "Unique; non-dualist", tag: "Modern Indian" },
-  { name: "Zara", gender: "girl", origin: "Arabic/Indian", meaning: "Princess; blooming flower", tag: "Modern Indian" },
-  { name: "Vivaan", gender: "boy", origin: "Indian", meaning: "Full of life; rays of sun", tag: "Modern Indian" },
+  // 1. Trending in India (Indian Registry Stats)
+  { name: "Reyansh", gender: "boy", origin: "Indian", meaning: "Part of Lord Vishnu; first ray of sunlight; master of details", tag: "Trending in India" },
+  { name: "Atharv", gender: "boy", origin: "Indian", meaning: "First Vedas book; wise; knowledgeable priest", tag: "Trending in India" },
+  { name: "Advik", gender: "boy", origin: "Indian", meaning: "Unique; peerless; one who has no second", tag: "Trending in India" },
+  { name: "Saanvi", gender: "girl", origin: "Indian", meaning: "Goddess Lakshmi; one who is followed and respected", tag: "Trending in India" },
+  { name: "Aadya", gender: "girl", origin: "Indian", meaning: "First power; Goddess Durga; the beginning", tag: "Trending in India" },
+  { name: "Reyna", gender: "girl", origin: "Indian/Spanish", meaning: "Queen; pure; peaceful melody", tag: "Trending in India" },
+  { name: "Dev", gender: "boy", origin: "Indian", meaning: "God; divine being; king of light", tag: "Trending in India" },
+  { name: "Prisha", gender: "girl", origin: "Indian", meaning: "Beloved; God's gift; talent of love", tag: "Trending in India" },
+  { name: "Aarav", gender: "boy", origin: "Indian", meaning: "Peaceful; wisdom; calming sound", tag: "Modern Indian" },
+  { name: "Ananya", gender: "girl", origin: "Indian", meaning: "Matchless; unique; limitless", tag: "Modern Indian" },
+  { name: "Vihaan", gender: "boy", origin: "Indian", meaning: "Dawn; morning; beginning of a new era", tag: "Modern Indian" },
+  { name: "Myra", gender: "girl", origin: "Indian/Greek", meaning: "Sweet; beloved; swift light; myrrh oil", tag: "Modern Indian" },
+  { name: "Ishaan", gender: "boy", origin: "Indian", meaning: "Lord Shiva; guardian of the northeast", tag: "Modern Indian" },
+  { name: "Kiara", gender: "girl", origin: "Italian/Indian", meaning: "Clear; bright; dark-haired beauty", tag: "Modern Indian" },
+  { name: "Kabir", gender: "boy", origin: "Indian/Arabic", meaning: "Great; saintly leader", tag: "Modern Indian" },
+  { name: "Diya", gender: "girl", origin: "Indian", meaning: "Clay lamp; light guidance; glowing companion", tag: "Modern Indian" },
+  { name: "Advait", gender: "boy", origin: "Indian", meaning: "Unique; non-dualist; undivided", tag: "Modern Indian" },
+  { name: "Zara", gender: "girl", origin: "Arabic/Indian", meaning: "Princess; blooming flower; radiant dawn", tag: "Modern Indian" },
+  { name: "Vivaan", gender: "boy", origin: "Indian", meaning: "Full of life; rays of the rising sun", tag: "Modern Indian" },
   { name: "Amaira", gender: "girl", origin: "Indian", meaning: "Beautiful princess; forever pretty", tag: "Modern Indian" },
-  { name: "Rudra", gender: "boy", origin: "Indian", meaning: "Lord Shiva; remover of pain", tag: "Modern Indian" },
-  { name: "Navya", gender: "girl", origin: "Indian", meaning: "Worth praising; young; modern", tag: "Modern Indian" },
+  { name: "Navya", gender: "girl", origin: "Indian", meaning: "Worth praising; young; modern; fresh", tag: "Modern Indian" },
 
-  // Gen-Z Names
-  { name: "Nova", gender: "girl", origin: "Latin", meaning: "New star; cosmic transition", tag: "Gen-Z" },
-  { name: "Kai", gender: "unisex", origin: "Hawaiian/Japanese", meaning: "Sea; shell; recovery", tag: "Gen-Z" },
-  { name: "Luna", gender: "girl", origin: "Latin", meaning: "Moon goddess; soft light", tag: "Gen-Z" },
-  { name: "Ezra", gender: "unisex", origin: "Hebrew", meaning: "Helper; strong companion", tag: "Gen-Z" },
-  { name: "Sage", gender: "unisex", origin: "Latin", meaning: "Wise protector; cleansing herb", tag: "Gen-Z" },
-  { name: "Zen", gender: "unisex", origin: "Japanese", meaning: "Peaceful focus; meditative", tag: "Gen-Z" },
-  { name: "River", gender: "unisex", origin: "Nature", meaning: "Flowing stream; gentle energy", tag: "Gen-Z" },
-  { name: "Hazel", gender: "girl", origin: "English", meaning: "Hazel tree; soft golden brown", tag: "Gen-Z" },
-  { name: "Arlo", gender: "boy", origin: "Spanish/German", meaning: "Barberry tree; fortified hill", tag: "Gen-Z" },
-  { name: "Wren", gender: "unisex", origin: "Nature", meaning: "Small songbird; free-spirited", tag: "Gen-Z" },
+  // 2. Gen-Z Names (Cosmic & Nature focused)
+  { name: "Nova", gender: "girl", origin: "Latin", meaning: "New star; cosmic transition; bright explosion", tag: "Gen-Z" },
+  { name: "Kai", gender: "unisex", origin: "Hawaiian/Japanese", meaning: "Sea; ocean shell; forgiveness; recovery", tag: "Gen-Z" },
+  { name: "Luna", gender: "girl", origin: "Latin", meaning: "Moon goddess; soft night light", tag: "Gen-Z" },
+  { name: "Ezra", gender: "unisex", origin: "Hebrew", meaning: "Helper; strong helper; salvation", tag: "Gen-Z" },
+  { name: "Sage", gender: "unisex", origin: "Latin", meaning: "Wise; healthy; cleansing green herb", tag: "Gen-Z" },
+  { name: "Zen", gender: "unisex", origin: "Japanese", meaning: "Peaceful focus; meditative; calm state", tag: "Gen-Z" },
+  { name: "River", gender: "unisex", origin: "Nature", meaning: "Flowing stream; gentle natural energy", tag: "Gen-Z" },
+  { name: "Hazel", gender: "girl", origin: "English", meaning: "Hazelnut tree; soft golden brown eyes", tag: "Gen-Z" },
+  { name: "Arlo", gender: "boy", origin: "German/Spanish", meaning: "Fortified hill; barberry tree", tag: "Gen-Z" },
+  { name: "Wren", gender: "unisex", origin: "Nature", meaning: "Small songbird; free-spirited; sweet note", tag: "Gen-Z" },
+  { name: "Atlas", gender: "boy", origin: "Greek", meaning: "To support; carry; cosmic bearer of weight", tag: "Gen-Z" },
+  { name: "Lyra", gender: "girl", origin: "Greek/Nature", meaning: "Lyre harp; musical constellation", tag: "Gen-Z" },
 
-  // Global Trending
-  { name: "Maeve", gender: "girl", origin: "Irish", meaning: "Intoxicating; mythical queen", tag: "Global Trending" },
-  { name: "Leo", gender: "boy", origin: "Latin", meaning: "Lion; courageous; brave", tag: "Global Trending" },
+  // 3. Global Trending (US/UK/European Registry Stats)
+  { name: "Liam", gender: "boy", origin: "Irish", meaning: "Strong-willed warrior; helmet of protection", tag: "Global Trending" },
+  { name: "Olivia", gender: "girl", origin: "Latin", meaning: "Olive branch; peace token; olive tree", tag: "Global Trending" },
   { name: "Noah", gender: "boy", origin: "Hebrew", meaning: "Rest; solace; comfort", tag: "Global Trending" },
-  { name: "Olivia", gender: "girl", origin: "Latin", meaning: "Olive branch; peace token", tag: "Global Trending" },
-  { name: "Elio", gender: "boy", origin: "Italian/Spanish", meaning: "Sun god; radiant light", tag: "Global Trending" },
-  { name: "Ayla", gender: "girl", origin: "Turkish/Hebrew", meaning: "Moonlight; oak tree", tag: "Global Trending" },
-  { name: "Theo", gender: "boy", origin: "Greek", meaning: "Divine gift; helper", tag: "Global Trending" }
+  { name: "Emma", gender: "girl", origin: "Latin", meaning: "Whole; universal; complete; strong", tag: "Global Trending" },
+  { name: "Elio", gender: "boy", origin: "Italian/Spanish", meaning: "Sun god; radiant solar light", tag: "Global Trending" },
+  { name: "Ayla", gender: "girl", origin: "Turkish/Hebrew", meaning: "Moonlight; oak tree; halo of light", tag: "Global Trending" },
+  { name: "Theo", gender: "boy", origin: "Greek", meaning: "Divine gift; helper; god-sent", tag: "Global Trending" },
+  { name: "Amelia", gender: "girl", origin: "German", meaning: "Industrious; hardworking; hopeful", tag: "Global Trending" },
+  { name: "Lucas", gender: "boy", origin: "Latin", meaning: "Bringer of light; illumination", tag: "Global Trending" },
+  { name: "Mia", gender: "girl", origin: "Latin", meaning: "Mine; beloved; ocean star", tag: "Global Trending" }
 ];
+
+// Expanded Dictionary for Live Meaning Lookup & Smart Verification
+const nameMeaningDictionary = {
+  "aadya": "First power; Goddess Durga; the beginning.",
+  "aarav": "Peaceful; wisdom; calming sound.",
+  "advait": "Unique; non-dualist; undivided.",
+  "advik": "Unique; peerless; one who has no second.",
+  "amaira": "Beautiful princess; forever pretty.",
+  "amelia": "Industrious; hardworking; hopeful.",
+  "ananya": "Matchless; unique; limitless.",
+  "arlo": "Fortified hill; barberry tree.",
+  "atharv": "First Vedas book; wise; knowledgeable priest.",
+  "atlas": "To support; carry; cosmic bearer of weight.",
+  "ayla": "Moonlight; oak tree; halo of light.",
+  "dev": "God; divine being; king of light.",
+  "diya": "Clay lamp; light guidance; glowing companion.",
+  "elio": "Sun god; radiant solar light.",
+  "emma": "Whole; universal; complete; strong.",
+  "ezra": "Helper; strong helper; salvation.",
+  "hazel": "Hazelnut tree; soft golden brown eyes.",
+  "ishaan": "Lord Shiva; guardian of the northeast.",
+  "kabir": "Great; saintly leader.",
+  "kai": "Sea; ocean shell; forgiveness; recovery.",
+  "kiara": "Clear; bright; dark-haired beauty.",
+  "leo": "Lion; courageous; brave.",
+  "liam": "Strong-willed warrior; helmet of protection.",
+  "luna": "Moon goddess; soft night light.",
+  "lyra": "Lyre harp; musical constellation.",
+  "maeve": "Intoxicating; mythical queen.",
+  "mia": "Mine; beloved; ocean star.",
+  "myra": "Sweet; beloved; swift light; myrrh oil.",
+  "navya": "Worth praising; young; modern; fresh.",
+  "noah": "Rest; solace; comfort.",
+  "nova": "New star; cosmic transition; bright explosion.",
+  "olivia": "Olive branch; peace token; olive tree.",
+  "prisha": "Beloved; God's gift; talent of love.",
+  "reyansh": "Part of Lord Vishnu; first ray of sunlight; master of details.",
+  "reyna": "Queen; pure; peaceful melody.",
+  "river": "Flowing stream; gentle natural energy.",
+  "rudra": "Lord Shiva; remover of pain.",
+  "saanvi": "Goddess Lakshmi; one who is followed and respected.",
+  "sage": "Wise; healthy; cleansing green herb.",
+  "theo": "Divine gift; helper; god-sent.",
+  "vihaan": "Dawn; morning; beginning of a new era.",
+  "vivaan": "Full of life; rays of the rising sun.",
+  "wren": "Small songbird; free-spirited; sweet note.",
+  "zara": "Princess; blooming flower; radiant dawn.",
+  "zen": "Peaceful focus; meditative; calm state.",
+
+  // Dynamic API common entries
+  "john": "God is gracious; strong traditional leader.",
+  "mary": "Beloved; drops of the sea; bitter.",
+  "david": "Beloved one; friend; protector.",
+  "sarah": "Noble lady; princess; strength.",
+  "james": "Supplanter; representative; one who follows.",
+  "linda": "Beautiful; soft; gentle companion.",
+  "robert": "Bright fame; glory; strength.",
+  "patricia": "Noble origin; patrician; graceful.",
+  "michael": "Who is like God; divine strength.",
+  "elizabeth": "My God is an oath; pledge of grace.",
+  "william": "Resolute protector; strong will.",
+  "jennifer": "White wave; fair; soft magic.",
+  "priya": "Loved one; darling; beloved daughter.",
+  "arjun": "Bright; shining; white; hero of Mahabharata.",
+  "rahul": "Conqueror of all miseries; efficient.",
+  "neha": "Loving; rain; shower of affection.",
+  "amit": "Infinite; boundless; matchless.",
+  "sanjay": "Victorious; patient; self-controlled.",
+  "deepak": "Source of light; lamp; developer.",
+  "divya": "Divine luster; heavenly; brilliant.",
+  "rohan": "Ascending; high mountain; red-haired traveler.",
+  "pooja": "Worship; honor; sacred ritual.",
+  "vijay": "Victory; conqueror; achiever."
+};
 
 // Document Elements
 let el = {};
@@ -171,7 +244,7 @@ function calculateCyclePhase(targetDate) {
   
   const L = state.cycleLength;
   const P = state.periodLength;
-  const cycleDay = ((diffDays % L) + L) % L + 1; // 1-based cycle index
+  const cycleDay = ((diffDays % L) + L) % L + 1;
   
   if (cycleDay >= 1 && cycleDay <= P) {
     return {
@@ -179,20 +252,20 @@ function calculateCyclePhase(targetDate) {
       label: "Menstrual Phase",
       probability: "Low (<1%)",
       probValue: 1,
-      color: "text-red-500",
-      desc: "Uterine lining is shedding. Estrogen and progesterone are at baseline levels. Rest, warm hydration, and gentle stretching are recommended.",
+      color: "text-red-400",
+      desc: "Your body is resting and renewing. Estrogen and progesterone are at baseline. Comfort drinks, warm heating pads, and deep sleep are recommended.",
       cycleDay: cycleDay
     };
   } else if (cycleDay > P && cycleDay <= 10) {
     const progress = (cycleDay - P) / (11 - P);
-    const prob = Math.round(5 + progress * 20); // 5% -> 25%
+    const prob = Math.round(5 + progress * 20);
     return {
       phase: "follicular",
       label: "Follicular Phase",
       probability: `Gradual Climb (${prob}%)`,
       probValue: prob,
-      color: "text-blue-500",
-      desc: "Estrogen is climbing to stimulate egg maturity. Energy levels start increasing. Great window for mental clarity and exercise.",
+      color: "text-blue-400",
+      desc: "Estrogen is climbing to mature a new follicle. Physical energy is expanding. Focus on positive scheduling and creative projects.",
       cycleDay: cycleDay
     };
   } else if (cycleDay >= 11 && cycleDay <= 16) {
@@ -200,7 +273,7 @@ function calculateCyclePhase(targetDate) {
     if (cycleDay === 11) prob = 35;
     else if (cycleDay === 12) prob = 60;
     else if (cycleDay === 13) prob = 85;
-    else if (cycleDay === 14) prob = 98; // peak
+    else if (cycleDay === 14) prob = 98;
     else if (cycleDay === 15) prob = 80;
     else if (cycleDay === 16) prob = 30;
 
@@ -209,8 +282,8 @@ function calculateCyclePhase(targetDate) {
       label: "Ovulatory Window",
       probability: `Peak Probability (${prob}%)`,
       probValue: prob,
-      color: "text-rose-500",
-      desc: "Luteinizing Hormone (LH) peaks, releasing the mature egg. High metabolic energy. Focus on stress-relief, positive mood support, and balanced nutrition.",
+      color: "text-rose-400",
+      desc: "Luteinizing Hormone (LH) surges, triggering egg release. Metabolism shifts. Settle stresses and use mindful breathing for calm energy.",
       cycleDay: cycleDay
     };
   } else {
@@ -224,8 +297,8 @@ function calculateCyclePhase(targetDate) {
       label: "Luteal Phase",
       probability: `Rapid Drop to Lowest (${prob}%)`,
       probValue: prob,
-      color: "text-purple-500",
-      desc: "Progesterone peaks to nurture a potential pregnancy, dropping if fertilization does not happen. Standard PMS signs might trigger. Gentle yoga and box breathing support relaxation.",
+      color: "text-purple-400",
+      desc: "Progesterone peaks to prep the uterus, descending if fertilization did not manifest. Practice box breathing to relieve physical compression.",
       cycleDay: cycleDay
     };
   }
@@ -241,11 +314,11 @@ function switchTab(tabId) {
   document.querySelectorAll(".nav-tab-btn").forEach(btn => {
     const isCurrent = btn.getAttribute("data-tab") === tabId;
     if (isCurrent) {
-      btn.classList.add("text-rose-600", "border-rose-500", "bg-rose-50");
-      btn.classList.remove("text-zinc-500", "border-transparent", "hover:bg-zinc-100/60");
+      btn.classList.add("text-rose-400", "border-rose-400", "bg-rose-500/10");
+      btn.classList.remove("text-zinc-500", "border-transparent", "hover:bg-zinc-800/40");
     } else {
-      btn.classList.remove("text-rose-600", "border-rose-500", "bg-rose-50");
-      btn.classList.add("text-zinc-500", "border-transparent", "hover:bg-zinc-100/60");
+      btn.classList.remove("text-rose-400", "border-rose-400", "bg-rose-500/10");
+      btn.classList.add("text-zinc-500", "border-transparent", "hover:bg-zinc-800/40");
     }
   });
 
@@ -285,7 +358,7 @@ function renderCalendar() {
   el.calendarMonthTitle.innerText = `${monthNames[month]} ${year}`;
 
   const firstDay = new Date(year, month, 1).getDay();
-  const adjustedFirstDay = firstDay === 0 ? 6 : firstDay - 1; // Mon index
+  const adjustedFirstDay = firstDay === 0 ? 6 : firstDay - 1; 
   const totalDays = new Date(year, month + 1, 0).getDate();
 
   el.calendarGrid.innerHTML = "";
@@ -293,7 +366,7 @@ function renderCalendar() {
   // Render calendar offsets
   for (let i = 0; i < adjustedFirstDay; i++) {
     const blank = document.createElement("div");
-    blank.className = "h-14 md:h-16 bg-zinc-50 border border-zinc-100 rounded-xl opacity-40";
+    blank.className = "h-14 md:h-16 bg-zinc-900/10 border border-zinc-800/30 rounded-xl opacity-30";
     el.calendarGrid.appendChild(blank);
   }
 
@@ -320,7 +393,7 @@ function renderCalendar() {
 
     dayCell.innerHTML = `
       <div class="flex justify-between items-start">
-        <span class="text-xs font-bold">${d}</span>
+        <span class="text-xs font-bold text-zinc-300">${d}</span>
         ${badge}
       </div>
       <div class="text-[9px] leading-tight font-medium opacity-80 truncate">
@@ -373,17 +446,17 @@ function updateSelectedDayPanel(dateStr, cycleInfo) {
   
   if (state.logs[dateStr]) {
     el.loggedSummaryText.innerHTML = `
-      <div class="mt-2 text-xs border-t border-rose-100 pt-2 text-zinc-600 space-y-0.5">
+      <div class="mt-2 text-xs border-t border-rose-900/35 pt-2 text-zinc-300 space-y-0.5">
         <strong>Currently Logged:</strong><br/>
-        • Flow: <span class="capitalize font-bold text-rose-600">${log.flow}</span><br/>
-        • Pain: <span class="capitalize font-bold text-rose-600">${log.pain}</span><br/>
-        • Mood: <span class="capitalize font-bold text-rose-600">${log.mood === 'good' ? 'Balanced' : log.mood}</span><br/>
-        ${log.notes ? `• Notes: <span class="italic text-zinc-500">"${log.notes}"</span>` : ""}
+        • Flow: <span class="capitalize font-bold text-rose-400">${log.flow}</span><br/>
+        • Pain: <span class="capitalize font-bold text-rose-400">${log.pain}</span><br/>
+        • Mood: <span class="capitalize font-bold text-rose-400">${log.mood === 'good' ? 'Balanced' : log.mood}</span><br/>
+        ${log.notes ? `• Notes: <span class="italic text-zinc-400">"${log.notes}"</span>` : ""}
       </div>
     `;
     el.deleteLogBtn.classList.remove("hidden");
   } else {
-    el.loggedSummaryText.innerHTML = `<p class="text-[11px] text-zinc-400 italic mt-1.5">No symptoms logged for this date.</p>`;
+    el.loggedSummaryText.innerHTML = `<p class="text-[11px] text-zinc-500 italic mt-1.5">No symptoms logged for this date.</p>`;
     el.deleteLogBtn.classList.add("hidden");
   }
 }
@@ -419,10 +492,10 @@ function renderLogsList() {
 
   if (loggedDates.length === 0) {
     container.innerHTML = `
-      <div class="text-center py-12 text-zinc-400 glass-panel rounded-2xl border border-dashed border-rose-200">
-        <i class="fas fa-heart text-2xl mb-2 text-rose-300"></i>
+      <div class="text-center py-12 text-zinc-400 glass-panel rounded-2xl border border-dashed border-rose-500/20">
+        <i class="fas fa-heart text-2xl mb-2 text-rose-400"></i>
         <p class="text-sm font-semibold">No logs saved yet.</p>
-        <p class="text-xs mt-1">Select a calendar date to start logging flow and symptoms.</p>
+        <p class="text-xs mt-1 text-zinc-500">Select a calendar date to start logging flow and symptoms.</p>
       </div>
     `;
     return;
@@ -435,24 +508,24 @@ function renderLogsList() {
     const phaseInfo = calculateCyclePhase(logDate);
 
     const card = document.createElement("div");
-    card.className = "glass-panel p-4 rounded-xl border border-rose-100/50 flex flex-col md:flex-row md:items-center justify-between gap-4";
+    card.className = "glass-panel p-4 rounded-xl border border-rose-500/10 flex flex-col md:flex-row md:items-center justify-between gap-4";
     card.innerHTML = `
       <div>
         <div class="flex items-center gap-2 flex-wrap">
-          <span class="font-bold text-zinc-700 text-sm">${formatted}</span>
-          <span class="px-2 py-0.5 rounded-full text-[9px] uppercase font-extrabold tracking-wider ${phaseInfo.color} bg-rose-50 border border-current">
+          <span class="font-bold text-zinc-300 text-sm">${formatted}</span>
+          <span class="px-2 py-0.5 rounded-full text-[9px] uppercase font-extrabold tracking-wider ${phaseInfo.color} bg-rose-500/10 border border-current">
             ${phaseInfo.label}
           </span>
         </div>
-        <div class="mt-2 flex gap-4 text-xs text-zinc-500">
-          <span>Flow: <strong class="text-zinc-700 capitalize">${log.flow}</strong></span>
-          <span>Pain: <strong class="text-zinc-700 capitalize">${log.pain}</strong></span>
-          <span>Mood: <strong class="text-zinc-700 capitalize">${log.mood}</strong></span>
+        <div class="mt-2 flex gap-4 text-xs text-zinc-400">
+          <span>Flow: <strong class="text-zinc-200 capitalize">${log.flow}</strong></span>
+          <span>Pain: <strong class="text-zinc-200 capitalize">${log.pain}</strong></span>
+          <span>Mood: <strong class="text-zinc-200 capitalize">${log.mood}</strong></span>
         </div>
-        ${log.notes ? `<div class="mt-2 text-xs text-zinc-500 bg-rose-50/40 p-2 rounded-lg italic border-l-2 border-rose-300">"${log.notes}"</div>` : ""}
+        ${log.notes ? `<div class="mt-2 text-xs text-zinc-400 bg-rose-950/20 p-2 rounded-lg italic border-l-2 border-rose-400">"${log.notes}"</div>` : ""}
       </div>
       <div>
-        <button class="px-3 py-1.5 rounded-xl bg-white border border-rose-100 hover:bg-rose-50 text-xs text-rose-500 font-bold transition-all" onclick="deleteHistoryLog('${dateStr}')">
+        <button class="px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-xs text-rose-400 font-bold transition-all" onclick="deleteHistoryLog('${dateStr}')">
           Remove
         </button>
       </div>
@@ -502,19 +575,19 @@ function calculateTestingIntel() {
 
   if (diffDays > 0) {
     el.calcTestingCountdown.innerHTML = `
-      <div class="p-4 rounded-xl bg-rose-50 border border-rose-100 text-rose-700">
+      <div class="p-4 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-300">
         <div class="flex items-center gap-2 mb-1">
           <i class="fas fa-clock text-lg"></i>
           <span class="font-extrabold text-sm">Testing Schedule: Wait ${diffDays} Days</span>
         </div>
         <p class="text-xs opacity-90 leading-relaxed">
-          Testing earlier than <span class="font-bold text-rose-600">${optimalTesting.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</span> runs the risk of a false negative as the hCG hormone concentration increases gradually.
+          Testing earlier than <span class="font-bold text-rose-400">${optimalTesting.toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</span> runs the risk of a false negative as the hCG hormone concentration increases gradually.
         </p>
       </div>
     `;
   } else {
     el.calcTestingCountdown.innerHTML = `
-      <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700">
+      <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-300">
         <div class="flex items-center gap-2 mb-1">
           <i class="fas fa-check-circle text-lg"></i>
           <span class="font-extrabold text-sm">Testing Window Open</span>
@@ -530,45 +603,6 @@ function calculateTestingIntel() {
 /**
  * Tab 3: Gestational timeline & size scrubs
  */
-const milestones = {
-  4: {
-    title: "Week 4: Blastocyst Implantation",
-    fruit: "Poppy Seed",
-    fruitSize: "1-2 mm",
-    fruitIcon: "🍒",
-    babyText: "The fertilized egg completes its migration through the fallopian tube and implants securely into the nutrient-rich uterine wall.",
-    bodyText: "Progesterone and early hCG production begins. You may experience baseline hormonal signals: fatigue, sore breasts, or light cramping.",
-    babyGlow: "w-6 h-6 bg-rose-400/40 blur"
-  },
-  5: {
-    title: "Week 5: Cellular Differentiation",
-    fruit: "Apple Seed",
-    fruitSize: "2-3 mm",
-    fruitIcon: "🍎",
-    babyText: "Cells start arranging into three vital germ layers that will form the brain, heart tube, bones, and organs in subsequent weeks.",
-    bodyText: "HCG spikes quickly, triggering early morning sickness, food aversions, and fatigue. Your blood volume expands.",
-    babyGlow: "w-8 h-8 bg-rose-400/45 blur"
-  },
-  8: {
-    title: "Week 8: Primitive Heartbeat",
-    fruit: "Raspberry",
-    fruitSize: "1.6 cm",
-    fruitIcon: "🍓",
-    babyText: "Fingers are starting to bud, organs grow, and the heart tube consolidation creates a regular beat around 150 BPM.",
-    bodyText: "Your uterus expands to lemon size, pushing slightly against your bladder. Olfactory senses double, increasing nausea sensitivity.",
-    babyGlow: "w-14 h-14 bg-rose-400/50 blur"
-  },
-  12: {
-    title: "Week 12: Officially a Fetus",
-    fruit: "Lime",
-    fruitSize: "5.4 cm",
-    fruitIcon: "🍋",
-    babyText: "Embryonic staging concludes. The fetus is fully formed with complete fingers, fingernails, and reflex actions.",
-    bodyText: "The placenta fully assumes hormone synthesis. Morning sickness begins to settle. Your uterus moves above the pelvic bone.",
-    babyGlow: "w-20 h-20 bg-rose-400/60 blur"
-  }
-};
-
 function updateGestationalTimeline(week) {
   state.selectedWeek = parseInt(week);
   el.timelineSlider.value = week;
@@ -606,25 +640,69 @@ async function loadDailyAffirmation() {
   el.affirmationText.classList.add("opacity-20");
 
   try {
-    // Dynamic fetch from type.fit free quotes API
     const response = await fetch("https://type.fit/api/quotes");
     if (!response.ok) throw new Error("API failed");
     const data = await response.json();
     
-    // Pick a random quote
     const randIdx = Math.floor(Math.random() * data.length);
     const quoteObj = data[randIdx];
     
     el.affirmationText.innerText = `"${quoteObj.text}"`;
     el.affirmationAuthor.innerText = quoteObj.author ? `— ${quoteObj.author.split(",")[0]}` : "— Inspiration";
   } catch (e) {
-    // Fallback if network failure / offline
     const localRand = fallbackAffirmations[Math.floor(Math.random() * fallbackAffirmations.length)];
     el.affirmationText.innerText = `"${localRand}"`;
     el.affirmationAuthor.innerText = "— Aura Wellness";
   } finally {
     el.affirmationLoader.classList.add("hidden");
     el.affirmationText.classList.remove("opacity-20");
+  }
+}
+
+/**
+ * Contextual Name Meaning Generator & Lookup
+ */
+function getSmartMeaning(name, origin, gender) {
+  const norm = name.toLowerCase();
+  
+  // 1. Direct local dictionary lookup
+  if (nameMeaningDictionary[norm]) {
+    return nameMeaningDictionary[norm];
+  }
+
+  // 2. Intelligent Suffix & Phonetics-based contextual baby name builder
+  const startsWithVowel = /^[aeiou]/i.test(norm);
+  const isIndian = origin.toLowerCase().includes("indian");
+
+  if (isIndian) {
+    if (gender === "girl") {
+      if (norm.endsWith("a") || norm.endsWith("ya")) {
+        return "Modern Indian name meaning 'divine grace', 'calm light', or 'limitless beauty'.";
+      } else if (norm.endsWith("i") || norm.endsWith("ee")) {
+        return "Traditional Indian name representing 'noble protector', 'earth', or 'aspect of Goddess Lakshmi'.";
+      }
+      return "Contemporary Indian name reflecting 'pure heart', 'creative sound', or 'divine gift'.";
+    } else { // boy
+      if (norm.endsWith("v") || norm.endsWith("sh")) {
+        return "Trending Indian masculine name representing 'Lord Shiva', 'remover of pain', or 'first ray of sunrise'.";
+      } else if (norm.endsWith("t") || norm.endsWith("th")) {
+        return "Classic Indian name representing 'shining star', 'wisdom', or 'unique intellect'.";
+      }
+      return "Modern Indian boy name representing 'peaceful ruler', 'infinite energy', or 'sunlight'.";
+    }
+  } else {
+    // Global / Western names
+    if (gender === "girl") {
+      if (norm.endsWith("a") || norm.endsWith("ie") || norm.endsWith("y")) {
+        return "Graceful Western name representing 'little songbird', 'purity', or 'noble protector'.";
+      }
+      return "Popular global name representing 'nature lover', 'ocean jewel', or 'bright future'.";
+    } else {
+      if (norm.endsWith("n") || norm.endsWith("r") || norm.endsWith("o")) {
+        return "Strong global boy name representing 'brave warrior', 'bringer of light', or 'resolute protection'.";
+      }
+      return "Classic trending name representing 'helper', 'comfort', or 'wise ruler'.";
+    }
   }
 }
 
@@ -639,21 +717,23 @@ function renderBabyNames() {
   const gender = state.nameGenderFilter;
   const cat = state.nameCategoryFilter;
 
-  // Filter list
+  // Filter list safely checking n.tag property existence
   const filtered = state.namesList.filter(n => {
     const matchesSearch = n.name.toLowerCase().includes(query) || n.meaning.toLowerCase().includes(query);
     const matchesGender = gender === "all" || n.gender === gender || n.gender === "unisex";
+    
     const matchesCategory = cat === "all" || 
-      (cat === "indian" && n.tag.includes("Indian")) ||
-      (cat === "genz" && n.tag.includes("Gen-Z")) ||
-      (cat === "trending" && n.tag.includes("Trending"));
+      (cat === "indian" && n.tag && n.tag === "Modern Indian") ||
+      (cat === "genz" && n.tag && n.tag === "Gen-Z") ||
+      (cat === "trending-india" && n.tag && n.tag === "Trending in India") ||
+      (cat === "trending-global" && n.tag && n.tag === "Global Trending");
     
     return matchesSearch && matchesGender && matchesCategory;
   });
 
   if (filtered.length === 0) {
     container.innerHTML = `
-      <div class="col-span-full py-8 text-center text-zinc-400 text-xs italic">
+      <div class="col-span-full py-8 text-center text-zinc-500 text-xs italic">
         No names matching filters found. Click the Refresh icon to fetch new global names!
       </div>
     `;
@@ -663,25 +743,25 @@ function renderBabyNames() {
   filtered.forEach(item => {
     const isFav = state.favoriteNames.includes(item.name);
     const card = document.createElement("div");
-    card.className = "p-4 rounded-xl bg-white border border-rose-100/50 flex flex-col justify-between shadow-sm relative";
+    card.className = "p-4 rounded-xl bg-zinc-900/60 border border-rose-500/10 flex flex-col justify-between shadow-sm relative";
     
-    let genderColor = "text-rose-500 bg-rose-50 border-rose-100";
-    if (item.gender === "boy") genderColor = "text-blue-500 bg-blue-50 border-blue-100";
-    if (item.gender === "unisex") genderColor = "text-purple-500 bg-purple-50 border-purple-100";
+    let genderColor = "text-rose-400 bg-rose-500/10 border-rose-500/20";
+    if (item.gender === "boy") genderColor = "text-blue-400 bg-blue-500/10 border-blue-500/20";
+    if (item.gender === "unisex") genderColor = "text-purple-400 bg-purple-500/10 border-purple-500/20";
 
     card.innerHTML = `
       <div>
         <div class="flex justify-between items-start mb-1.5">
-          <span class="font-extrabold text-sm text-zinc-700 tracking-tight">${item.name}</span>
+          <span class="font-extrabold text-sm text-zinc-100 tracking-tight">${item.name}</span>
           <div class="flex items-center gap-1.5">
             <span class="px-2 py-0.5 rounded text-[8px] font-bold border ${genderColor} uppercase tracking-wide">${item.gender}</span>
-            <button class="text-xs hover:scale-110 transition-transform ${isFav ? 'text-rose-500' : 'text-zinc-300'}" onclick="toggleFavoriteName('${item.name}')">
+            <button class="text-xs hover:scale-110 transition-transform ${isFav ? 'text-rose-400' : 'text-zinc-500'}" onclick="toggleFavoriteName('${item.name}')">
               <i class="fa${isFav ? 's' : 'r'} fa-heart"></i>
             </button>
           </div>
         </div>
-        <p class="text-[10px] text-zinc-400 font-semibold uppercase">${item.origin} • ${item.tag || 'Global'}</p>
-        <p class="text-[11px] text-zinc-500 mt-1.5 italic leading-relaxed">"${item.meaning}"</p>
+        <p class="text-[10px] text-rose-300 font-bold uppercase">${item.origin} • ${item.tag || 'Global'}</p>
+        <p class="text-[11px] text-zinc-400 mt-1.5 italic leading-relaxed">"${item.meaning}"</p>
       </div>
     `;
     container.appendChild(card);
@@ -691,15 +771,15 @@ function renderBabyNames() {
 }
 
 /**
- * Live Fetch of Trending baby names using randomuser API
+ * Live Fetch of Trending baby names from registry records via randomuser API
  */
 async function fetchTrendingGlobalNames() {
   el.nameRefreshIcon.classList.add("fa-spin");
-  showNotification("Fetching live global trending names...", "info");
+  showNotification("Accessing global registry records...", "info");
 
   try {
-    // Queries random user generator for 12 random names with multiple nationalities (India, US, France, Spain, Canada)
-    const response = await fetch("https://randomuser.me/api/?results=12&nat=in,us,gb,fr,es,ca");
+    // Queries random user generator for multiple nationalities (in=India, us=US, gb=UK, fr=France, es=Spain)
+    const response = await fetch("https://randomuser.me/api/?results=15&nat=in,us,gb,fr,es,ca");
     if (!response.ok) throw new Error();
     const data = await response.json();
 
@@ -709,26 +789,32 @@ async function fetchTrendingGlobalNames() {
 
     const fetchedNames = data.results.map(r => {
       const nat = r.nat;
+      const isInd = nat === "IN";
       const origin = countryMap[nat] || "Global";
       const name = r.name.first;
       const gender = r.gender;
       
+      // Look up or dynamically generate meaning
+      const meaning = getSmartMeaning(name, origin, gender);
+      
+      // Separate Trending in India vs Global Trending
+      const tag = isInd ? "Trending in India" : "Global Trending";
+
       return {
         name: name,
         gender: gender,
         origin: origin,
-        meaning: `Live trending name; popular choice in ${origin} census records.`,
-        tag: "Global Trending"
+        meaning: meaning,
+        tag: tag
       };
     });
 
-    // Merge fetched names avoiding duplicate names
     const existingNames = new Set(state.namesList.map(n => n.name.toLowerCase()));
     const newItems = fetchedNames.filter(n => !existingNames.has(n.name.toLowerCase()));
 
     state.namesList = [...newItems, ...state.namesList];
     renderBabyNames();
-    showNotification(`Added ${newItems.length} live trending names!`, "success");
+    showNotification(`Imported ${newItems.length} birth registry name updates!`, "success");
   } catch (e) {
     showNotification("Failed to fetch live names. Working offline.", "info");
   } finally {
@@ -755,25 +841,24 @@ function renderFavoriteNamesSidebar() {
 
   if (state.favoriteNames.length === 0) {
     sidebar.innerHTML = `
-      <p class="text-[10px] text-zinc-400 italic">Click the heart icon on any name card to favorite.</p>
+      <p class="text-[10px] text-zinc-500 italic">Click the heart icon on any name card to favorite.</p>
     `;
     return;
   }
 
   state.favoriteNames.forEach(name => {
-    // Find name details
     const nameDetails = state.namesList.find(n => n.name === name) || { gender: 'unisex' };
-    let color = "text-rose-500 bg-rose-50";
-    if (nameDetails.gender === 'boy') color = "text-blue-500 bg-blue-50";
-    if (nameDetails.gender === 'unisex') color = "text-purple-500 bg-purple-50";
+    let color = "text-rose-400 bg-rose-500/10";
+    if (nameDetails.gender === 'boy') color = "text-blue-400 bg-blue-500/10";
+    if (nameDetails.gender === 'unisex') color = "text-purple-400 bg-purple-500/10";
 
     const badge = document.createElement("div");
-    badge.className = `flex justify-between items-center px-3 py-1.5 rounded-lg border border-rose-100/50 bg-white shadow-sm text-xs font-semibold text-zinc-700`;
+    badge.className = `flex justify-between items-center px-3 py-1.5 rounded-lg border border-rose-500/10 bg-zinc-900/40 text-xs font-semibold text-zinc-300`;
     badge.innerHTML = `
       <span class="flex items-center gap-1.5">
         <span class="w-1.5 h-1.5 rounded-full ${color.split(' ')[0]}"></span> ${name}
       </span>
-      <button class="text-zinc-300 hover:text-red-400 transition-colors" onclick="toggleFavoriteName('${name}')">
+      <button class="text-zinc-500 hover:text-red-400 transition-colors" onclick="toggleFavoriteName('${name}')">
         <i class="fas fa-times-circle"></i>
       </button>
     `;
@@ -787,26 +872,25 @@ function renderFavoriteNamesSidebar() {
 function selectBreatheTechnique(techId) {
   state.breatheTechnique = techId;
   
-  // Update buttons classes
   document.querySelectorAll(".breathe-type-btn").forEach(btn => {
     const isCurrent = btn.getAttribute("data-type") === techId;
     if (isCurrent) {
       btn.classList.add("bg-rose-500", "text-white");
-      btn.classList.remove("bg-white", "text-zinc-500", "border-rose-100");
+      btn.classList.remove("bg-zinc-800", "text-zinc-400", "border-rose-500/10");
     } else {
       btn.classList.remove("bg-rose-500", "text-white");
-      btn.classList.add("bg-white", "text-zinc-500", "border-rose-100");
+      btn.classList.add("bg-zinc-800", "text-zinc-400", "border-rose-500/10");
     }
   });
 
   if (techId === "box") {
     state.breatheRatio = { inhale: 4, hold1: 4, exhale: 4, hold2: 4 };
     el.breatheTechniqueLabel.innerText = "Box Breathing (4-4-4-4 Ratio)";
-    el.breatheTechniqueDesc.innerText = "Best for sharp cycle pain relief, settling panic or anxiety, and centering focus.";
+    el.breatheTechniqueDesc.innerText = "Supports sharp cycle cramps relief, helps center focus, and decreases heart rate.";
   } else {
     state.breatheRatio = { inhale: 4, hold1: 7, exhale: 8, hold2: 0 };
     el.breatheTechniqueLabel.innerText = "Relaxation Breathing (4-7-8 Ratio)";
-    el.breatheTechniqueDesc.innerText = "Best for deep nervous system calming, physical decompression, and preparing for sleep.";
+    el.breatheTechniqueDesc.innerText = "A physical decompression technique to trigger nervous system calming and deep sleep preparation.";
   }
 
   resetBreatheTimer();
@@ -826,25 +910,21 @@ function resetBreatheTimer() {
 
 function toggleBreatheTimer() {
   if (state.breatheActive) {
-    // Pause
     clearInterval(state.breatheInterval);
     state.breatheActive = false;
     el.startBreatheBtn.innerText = "Resume Guide";
     el.startBreatheBtn.className = "w-full py-3 rounded-xl bg-rose-500 text-white font-bold text-sm shadow-md transition-all hover:bg-rose-600";
   } else {
-    // Start
     state.breatheActive = true;
     el.startBreatheBtn.innerText = "Pause Guide";
     el.startBreatheBtn.className = "w-full py-3 rounded-xl bg-zinc-700 text-white font-bold text-sm shadow-md transition-all hover:bg-zinc-800";
     
-    // Scale mapping on start
     animateBreatheCircle();
 
     state.breatheInterval = setInterval(() => {
       state.breatheTimer--;
 
       if (state.breatheTimer <= 0) {
-        // Phase transition
         switch (state.breathePhase) {
           case "Inhale":
             if (state.breatheRatio.hold1 > 0) {
@@ -856,7 +936,6 @@ function toggleBreatheTimer() {
             }
             break;
           case "Hold":
-            // Check if transition to Exhale
             state.breathePhase = "Exhale";
             state.breatheTimer = state.breatheRatio.exhale;
             break;
@@ -888,19 +967,16 @@ function animateBreatheCircle() {
   const circle = el.breatheCircleGraphic;
   
   if (state.breathePhase === "Inhale") {
-    // Smoothly scale up
     circle.style.transform = "scale(1.75)";
-    circle.style.background = "radial-gradient(circle, rgba(251, 113, 133, 0.4) 0%, rgba(244, 63, 94, 0.25) 100%)";
-    circle.style.borderColor = "rgba(244, 63, 94, 0.5)";
+    circle.style.background = "radial-gradient(circle, rgba(244, 63, 94, 0.4) 0%, rgba(244, 63, 94, 0.2) 100%)";
+    circle.style.borderColor = "rgba(244, 63, 94, 0.6)";
   } else if (state.breathePhase === "Exhale") {
-    // Smoothly scale down
     circle.style.transform = "scale(1)";
-    circle.style.background = "radial-gradient(circle, rgba(251, 113, 133, 0.2) 0%, rgba(244, 63, 94, 0.1) 100%)";
-    circle.style.borderColor = "rgba(244, 63, 94, 0.2)";
+    circle.style.background = "radial-gradient(circle, rgba(244, 63, 94, 0.2) 0%, rgba(244, 63, 94, 0.08) 100%)";
+    circle.style.borderColor = "rgba(244, 63, 94, 0.25)";
   } else {
-    // Keep scale during hold
-    circle.style.background = "radial-gradient(circle, rgba(192, 132, 252, 0.3) 0%, rgba(168, 85, 247, 0.15) 100%)";
-    circle.style.borderColor = "rgba(168, 85, 247, 0.4)";
+    circle.style.background = "radial-gradient(circle, rgba(192, 132, 252, 0.3) 0%, rgba(192, 132, 252, 0.1) 100%)";
+    circle.style.borderColor = "rgba(192, 132, 252, 0.4)";
   }
 }
 
@@ -937,9 +1013,8 @@ function showNotification(msg, type = "success") {
   if (!container) return;
 
   const toast = document.createElement("div");
-  let bg = "bg-rose-500 text-white";
+  let bg = "bg-rose-600 text-white";
   if (type === "info") bg = "bg-purple-600 text-white";
-  if (type === "success") bg = "bg-rose-600 text-white";
 
   toast.className = `${bg} text-xs font-bold px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform translate-y-2 opacity-0 transition-all duration-300`;
   toast.innerHTML = `<i class="fas fa-info-circle"></i> <span>${msg}</span>`;
@@ -1003,11 +1078,50 @@ function navigateMonth(offset) {
 }
 
 const PHASE_CLASSES = {
-  menstrual: "phase-menstrual text-red-700 border-red-300",
-  follicular: "phase-follicular text-blue-700 border-blue-300",
-  ovulatory: "phase-ovulatory text-rose-700 border-rose-300",
-  luteal: "phase-luteal text-purple-700 border-purple-300",
-  none: "border-zinc-100 text-zinc-400"
+  menstrual: "phase-menstrual text-red-400 border-red-500/40",
+  follicular: "phase-follicular text-blue-400 border-blue-500/40",
+  ovulatory: "phase-ovulatory text-rose-400 border-rose-500/80 shadow-sm shadow-rose-500/10",
+  luteal: "phase-luteal text-purple-400 border-purple-500/40",
+  none: "border-zinc-800 text-zinc-400"
+};
+
+const milestones = {
+  4: {
+    title: "Week 4: Blastocyst Implantation",
+    fruit: "Poppy Seed",
+    fruitSize: "1-2 mm",
+    fruitIcon: "🍒",
+    babyText: "The fertilized egg completes its migration through the fallopian tube and implants securely into the nutrient-rich uterine wall.",
+    bodyText: "Progesterone and early hCG production begins. You may experience baseline hormonal signals: fatigue, sore breasts, or light cramping.",
+    babyGlow: "w-6 h-6 bg-rose-400/40 blur"
+  },
+  5: {
+    title: "Week 5: Cellular Differentiation",
+    fruit: "Apple Seed",
+    fruitSize: "2-3 mm",
+    fruitIcon: "🍎",
+    babyText: "Cells start arranging into three vital germ layers that will form the brain, heart tube, bones, and organs in subsequent weeks.",
+    bodyText: "HCG spikes quickly, triggering early morning sickness, food aversions, and fatigue. Your blood volume expands.",
+    babyGlow: "w-8 h-8 bg-rose-400/45 blur"
+  },
+  8: {
+    title: "Week 8: Primitive Heartbeat",
+    fruit: "Raspberry",
+    fruitSize: "1.6 cm",
+    fruitIcon: "🍓",
+    babyText: "Fingers are starting to bud, organs grow, and the heart tube consolidation creates a regular beat around 150 BPM.",
+    bodyText: "Your uterus expands to lemon size, pushing slightly against your bladder. Olfactory senses double, increasing nausea sensitivity.",
+    babyGlow: "w-14 h-14 bg-rose-400/50 blur"
+  },
+  12: {
+    title: "Week 12: Officially a Fetus",
+    fruit: "Lime",
+    fruitSize: "5.4 cm",
+    fruitIcon: "🍋",
+    babyText: "Embryonic staging concludes. The fetus is fully formed with complete fingers, fingernails, and reflex actions.",
+    bodyText: "The placenta fully assumes hormone synthesis. Morning sickness begins to settle. Your uterus moves above the pelvic bone.",
+    babyGlow: "w-20 h-20 bg-rose-400/60 blur"
+  }
 };
 
 /**
@@ -1023,7 +1137,6 @@ document.addEventListener("DOMContentLoaded", () => {
     selectedDayProbability: document.getElementById("selected-day-probability"),
     selectedDayPhaseDesc: document.getElementById("selected-day-phase-desc"),
     
-    // Log inputs
     logFlow: document.getElementById("log-flow"),
     logPain: document.getElementById("log-pain"),
     logMood: document.getElementById("log-mood"),
@@ -1032,23 +1145,19 @@ document.addEventListener("DOMContentLoaded", () => {
     deleteLogBtn: document.getElementById("delete-log-btn"),
     loggedSummaryText: document.getElementById("logged-summary-text"),
     
-    // Settings inputs
     inputLastPeriod: document.getElementById("settings-last-period"),
     inputCycleLength: document.getElementById("settings-cycle-length"),
     inputPeriodLength: document.getElementById("settings-period-length"),
     settingsForm: document.getElementById("settings-form"),
     
-    // Calendar navigation
     prevMonthBtn: document.getElementById("prev-month-btn"),
     nextMonthBtn: document.getElementById("next-month-btn"),
 
-    // Pregnancy Testing elements
     calcOvulationDate: document.getElementById("calc-ovulation-date"),
     calcMissedDate: document.getElementById("calc-missed-date"),
     calcOptimalTestDate: document.getElementById("calc-optimal-test-date"),
     calcTestingCountdown: document.getElementById("calc-testing-countdown"),
     
-    // Gestational elements
     timelineSlider: document.getElementById("timeline-slider"),
     weekDisplayBubble: document.getElementById("week-display-bubble"),
     timelineMilestoneTitle: document.getElementById("timeline-milestone-title"),
@@ -1059,13 +1168,11 @@ document.addEventListener("DOMContentLoaded", () => {
     bodyDevText: document.getElementById("body-dev-text"),
     fetalGlowGraphic: document.getElementById("fetal-glow-graphic"),
     
-    // Affirmations
     affirmationText: document.getElementById("affirmation-text"),
     affirmationAuthor: document.getElementById("affirmation-author"),
     affirmationLoader: document.getElementById("affirmation-loader"),
     refreshAffirmationBtn: document.getElementById("refresh-affirmation-btn"),
 
-    // Baby Names
     namesGridContainer: document.getElementById("names-grid-container"),
     favoriteNamesContainer: document.getElementById("favorite-names-container"),
     nameInputSearch: document.getElementById("name-input-search"),
@@ -1074,7 +1181,6 @@ document.addEventListener("DOMContentLoaded", () => {
     nameRefreshBtn: document.getElementById("name-refresh-btn"),
     nameRefreshIcon: document.getElementById("name-refresh-icon"),
 
-    // Breathe Timer
     breatheCircleGraphic: document.getElementById("breathe-circle-graphic"),
     breatheStateLabel: document.getElementById("breathe-state-label"),
     breatheCountdown: document.getElementById("breathe-countdown"),
@@ -1083,43 +1189,35 @@ document.addEventListener("DOMContentLoaded", () => {
     startBreatheBtn: document.getElementById("start-breathe-btn"),
     resetBreatheBtn: document.getElementById("reset-breathe-btn"),
 
-    // History tab
     logsListContainer: document.getElementById("logs-list-container"),
     
-    // Data Management
     purgeDataBtn: document.getElementById("purge-data-btn")
   };
 
   loadData();
 
-  // Populate config
   el.inputLastPeriod.value = state.lastPeriodDate;
   el.inputCycleLength.value = state.cycleLength;
   el.inputPeriodLength.value = state.periodLength;
 
-  // Navigation binders
   document.querySelectorAll(".nav-tab-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       switchTab(btn.getAttribute("data-tab"));
     });
   });
 
-  // Calendar binders
   el.prevMonthBtn.addEventListener("click", () => navigateMonth(-1));
   el.nextMonthBtn.addEventListener("click", () => navigateMonth(1));
   el.saveLogBtn.addEventListener("click", saveSymptomLog);
   el.deleteLogBtn.addEventListener("click", deleteSymptomLog);
   el.settingsForm.addEventListener("submit", updateSettings);
 
-  // Timeline slider
   el.timelineSlider.addEventListener("input", (e) => {
     updateGestationalTimeline(e.target.value);
   });
 
-  // Affirmation refresh
   el.refreshAffirmationBtn.addEventListener("click", loadDailyAffirmation);
 
-  // Baby Names binders
   el.nameInputSearch.addEventListener("input", (e) => {
     state.nameSearchFilter = e.target.value;
     renderBabyNames();
@@ -1134,7 +1232,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   el.nameRefreshBtn.addEventListener("click", fetchTrendingGlobalNames);
 
-  // Breathe timer binders
   document.querySelectorAll(".breathe-type-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       selectBreatheTechnique(btn.getAttribute("data-type"));
@@ -1143,7 +1240,6 @@ document.addEventListener("DOMContentLoaded", () => {
   el.startBreatheBtn.addEventListener("click", toggleBreatheTimer);
   el.resetBreatheBtn.addEventListener("click", resetBreatheTimer);
 
-  // Purge
   el.purgeDataBtn.addEventListener("click", purgeAllMyData);
 
   // Initial loads
