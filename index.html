@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aura Health - Private Women's Cycle & Pregnancy Companion</title>
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="A highly secure, 100% client-side single page application for cycle tracking, fertility calculations, pregnancy test indicators, and clinical symptom triage.">
+  <meta name="keywords" content="women's health, cycle tracker, fertility visualizer, pregnancy testing kit, gestational timeline, symptom triage, client-side, privacy">
+  <meta name="author" content="Aura Health">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- Custom CSS Link -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#090514',
+              purple: '#8b5cf6',
+              rose: '#f43f5e',
+              peach: '#fda4af'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-screen text-zinc-100 flex flex-col antialiased">
+
+  <!-- Ambient Glow Effects -->
+  <div class="bg-glow-purple top-10 left-[-100px]"></div>
+  <div class="bg-glow-rose top-[300px] right-[-200px]"></div>
+
+  <!-- Header Header area -->
+  <header class="relative z-10 w-full max-w-7xl mx-auto px-4 pt-6 pb-2">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800/80 pb-6">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-rose-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+            Aura Health
+          </span>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-300 font-bold uppercase tracking-wider">
+            Private SPA
+          </span>
+        </div>
+        <p class="text-xs text-zinc-400 mt-1">
+          Secure client-side fertility mapping & body transformation intelligence.
+        </p>
+      </div>
+
+      <!-- Quick stats / Info header -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-lg border border-emerald-500/20">
+          <i class="fas fa-shield-alt"></i>
+          <span>100% Local (Zero Servers)</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Body Content Grid -->
+  <main class="relative z-10 flex-grow w-full max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+    <!-- Sidebar / Settings Control Panel -->
+    <section class="lg:col-span-1 flex flex-col gap-6" aria-labelledby="settings-heading">
+      <!-- Profile settings card -->
+      <div class="glass-panel p-5 rounded-2xl border border-zinc-800/60 shadow-xl">
+        <h2 id="settings-heading" class="text-base font-bold text-white mb-4 flex items-center gap-2">
+          <i class="fas fa-sliders-h text-rose-400"></i>
+          <span>Cycle Calibration</span>
+        </h2>
+        
+        <form id="settings-form" class="space-y-4">
+          <div>
+            <label for="settings-last-period" class="block text-xs font-semibold text-zinc-400 mb-1.5">Last Period Start Date</label>
+            <input type="date" id="settings-last-period" required
+                   class="glass-input w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-rose-500">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="settings-cycle-length" class="block text-xs font-semibold text-zinc-400 mb-1.5">Avg Cycle Days</label>
+              <input type="number" id="settings-cycle-length" min="15" max="60" required
+                     class="glass-input w-full px-3 py-2 rounded-xl text-sm text-center">
+            </div>
+            <div>
+              <label for="settings-period-length" class="block text-xs font-semibold text-zinc-400 mb-1.5">Period Length</label>
+              <input type="number" id="settings-period-length" min="2" max="15" required
+                     class="glass-input w-full px-3 py-2 rounded-xl text-sm text-center">
+            </div>
+          </div>
+
+          <button type="submit" id="save-settings-btn"
+                  class="w-full py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white font-bold text-xs shadow-md shadow-rose-950/20 transition-all duration-200">
+            Apply Configuration
+          </button>
+        </form>
+      </div>
+
+      <!-- Quick navigation tab sidebar -->
+      <nav class="glass-panel p-2.5 rounded-2xl border border-zinc-800/60 flex flex-col gap-1.5" aria-label="Main Navigation">
+        <button data-tab="fertility" class="nav-tab-btn w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 transition-all duration-200 text-rose-400 border-rose-400 bg-rose-500/10 border-l-2">
+          <i class="fas fa-calendar-alt w-5 text-center"></i>
+          <span>Fertility Calendar</span>
+        </button>
+        <button data-tab="testing" class="nav-tab-btn w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 transition-all duration-200 text-zinc-400 border-transparent hover:bg-zinc-800/40 border-l-2">
+          <i class="fas fa-vial w-5 text-center"></i>
+          <span>Pregnancy Testing Kit</span>
+        </button>
+        <button data-tab="timeline" class="nav-tab-btn w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 transition-all duration-200 text-zinc-400 border-transparent hover:bg-zinc-800/40 border-l-2">
+          <i class="fas fa-baby w-5 text-center"></i>
+          <span>Gestational Timeline</span>
+        </button>
+        <button data-tab="triage" class="nav-tab-btn w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 transition-all duration-200 text-zinc-400 border-transparent hover:bg-zinc-800/40 border-l-2">
+          <i class="fas fa-notes-medical w-5 text-center"></i>
+          <span>Clinical Triage</span>
+        </button>
+        <button data-tab="logs" class="nav-tab-btn w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3 transition-all duration-200 text-zinc-400 border-transparent hover:bg-zinc-800/40 border-l-2">
+          <i class="fas fa-history w-5 text-center"></i>
+          <span>Symptom History</span>
+        </button>
+      </nav>
+
+      <!-- Data management / Privacy purge -->
+      <div class="glass-panel p-4 rounded-2xl border border-zinc-800/60 mt-auto">
+        <h3 class="text-xs font-bold text-zinc-400 mb-2 uppercase tracking-wider">Privacy Controls</h3>
+        <p class="text-[10px] text-zinc-500 mb-3 leading-relaxed">
+          Your configurations and clinical logs reside purely in your browser's local cache. No data will ever leave this device.
+        </p>
+        <button id="purge-data-btn"
+                class="w-full py-2 text-xs font-bold text-red-400 hover:text-white border border-red-500/30 hover:bg-red-500/15 rounded-xl transition-all duration-200">
+          <i class="fas fa-trash-alt mr-1.5"></i> Purge All My Data
+        </button>
+      </div>
+    </section>
+
+    <!-- Main Workspace Tab Area -->
+    <section class="lg:col-span-3 flex flex-col gap-6" aria-label="Workspace Area">
+
+      <!-- TAB 1: FERTILITY & CYCLE VISUALIZER -->
+      <div id="fertility-panel" class="tab-panel space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          <!-- Calendar Card -->
+          <div class="md:col-span-2 glass-panel p-5 rounded-2xl border border-zinc-800/60 shadow-xl flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <i class="fas fa-calendar-alt text-rose-400"></i>
+                <span>Fertility & Cycle Visualizer</span>
+              </h2>
+              <!-- Calendar Navigation -->
+              <div class="flex items-center gap-1">
+                <button id="prev-month-btn" class="p-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-white transition-all text-xs" aria-label="Previous Month">
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <span id="calendar-month-title" class="text-xs font-bold px-3 text-zinc-200 min-w-[90px] text-center">May 2026</span>
+                <button id="next-month-btn" class="p-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-white transition-all text-xs" aria-label="Next Month">
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Calendar Header (Days) -->
+            <div class="grid grid-cols-7 gap-2 mb-2 text-center text-[10px] font-bold tracking-wider text-zinc-500 uppercase">
+              <div>Mon</div>
+              <div>Tue</div>
+              <div>Wed</div>
+              <div>Thu</div>
+              <div>Fri</div>
+              <div>Sat</div>
+              <div>Sun</div>
+            </div>
+
+            <!-- Calendar Grid -->
+            <div id="calendar-grid" class="grid grid-cols-7 gap-2 flex-grow">
+              <!-- Loaded dynamically via app.js -->
+            </div>
+
+            <!-- Calendar Legend -->
+            <div class="mt-4 pt-4 border-t border-zinc-800/60 flex flex-wrap gap-x-4 gap-y-2 justify-center text-[10px] font-semibold text-zinc-400">
+              <span class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded-md bg-red-500/20 border border-red-500/40"></span> Menstrual (Low)
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded-md bg-blue-500/20 border border-blue-500/40"></span> Follicular (Climb)
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded-md bg-rose-500/20 border border-rose-500/50 shadow-sm shadow-rose-500/10"></span> Ovulatory (Peak)
+              </span>
+              <span class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded-md bg-purple-500/20 border border-purple-500/40"></span> Luteal (Drop)
+              </span>
+            </div>
+          </div>
+
+          <!-- Selected Day Details & Symptoms Logging -->
+          <div class="md:col-span-1 flex flex-col gap-6">
+            <div class="glass-panel p-5 rounded-2xl border border-zinc-800/60 shadow-xl flex-grow">
+              <h3 class="text-sm font-bold text-zinc-400 mb-1 uppercase tracking-wider">Day Diagnostics</h3>
+              <p id="selected-day-label" class="text-sm font-bold text-white mb-3">Wednesday, May 27, 2026</p>
+              
+              <!-- Metrics overlay -->
+              <div class="space-y-4">
+                <div>
+                  <span class="text-[10px] block font-semibold text-zinc-500 uppercase">Phase Classification</span>
+                  <div id="selected-day-phase" class="text-sm font-bold text-zinc-300">Follicular Phase</div>
+                  <span id="selected-day-cycle-day" class="text-[10px] font-bold text-zinc-400">Cycle Day 10</span>
+                </div>
+                <div>
+                  <span class="text-[10px] block font-semibold text-zinc-500 uppercase">Pregnancy Probability</span>
+                  <div id="selected-day-probability" class="text-sm font-bold text-zinc-300">Gradual Climb (25%)</div>
+                </div>
+                <div>
+                  <span class="text-[10px] block font-semibold text-zinc-500 uppercase">Biological Summary</span>
+                  <p id="selected-day-phase-desc" class="text-xs text-zinc-400 leading-relaxed mt-1">
+                    Your ovarian follicles are maturing and estrogen is rising. Uterine lining begins reconstruction.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick symptom Logger -->
+            <div class="glass-panel p-5 rounded-2xl border border-zinc-800/60 shadow-xl">
+              <h3 class="text-sm font-bold text-zinc-400 mb-3 uppercase tracking-wider flex items-center justify-between">
+                <span>Log Symptoms</span>
+                <span id="delete-log-btn" class="hidden text-red-400 hover:text-red-300 text-xs cursor-pointer" title="Delete Log">
+                  <i class="fas fa-trash"></i>
+                </span>
+              </h3>
+              
+              <div class="space-y-3">
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label for="log-flow" class="block text-[10px] font-semibold text-zinc-500 uppercase mb-1">Flow</label>
+                    <select id="log-flow" class="glass-input w-full px-2.5 py-1.5 rounded-lg text-xs">
+                      <option value="none">None</option>
+                      <option value="light">Light</option>
+                      <option value="medium">Medium</option>
+                      <option value="heavy">Heavy</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="log-pain" class="block text-[10px] font-semibold text-zinc-500 uppercase mb-1">Pain</label>
+                    <select id="log-pain" class="glass-input w-full px-2.5 py-1.5 rounded-lg text-xs">
+                      <option value="none">None</option>
+                      <option value="mild">Mild Cramps</option>
+                      <option value="severe">Severe Pain</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label for="log-mood" class="block text-[10px] font-semibold text-zinc-500 uppercase mb-1">Mood Status</label>
+                  <select id="log-mood" class="glass-input w-full px-2.5 py-1.5 rounded-lg text-xs">
+                    <option value="good">Energetic / Balanced</option>
+                    <option value="fatigued">Fatigued</option>
+                    <option value="sensitive">Sensitive / Emotional</option>
+                    <option value="pms">Crampy / PMS</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label for="log-notes" class="block text-[10px] font-semibold text-zinc-500 uppercase mb-1">Personal Notes</label>
+                  <textarea id="log-notes" placeholder="Notes..." rows="2"
+                            class="glass-input w-full px-2.5 py-1.5 rounded-lg text-xs resize-none"></textarea>
+                </div>
+
+                <button id="save-log-btn"
+                        class="w-full py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/40 text-xs font-bold transition-all duration-200">
+                  Save Logs
+                </button>
+
+                <div id="logged-summary-text"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Warning Bar -->
+        <div class="glass-panel p-4 rounded-2xl border border-rose-500/20 bg-rose-500/5 text-rose-300 flex items-start gap-3">
+          <i class="fas fa-exclamation-triangle mt-1 text-sm"></i>
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider mb-0.5">Statistical Probability Warning</h4>
+            <p class="text-[11px] leading-relaxed opacity-90">
+              The calculations map baseline statistics for cycle models. Variations in stress, sleep, health, and metabolism mean ovulation triggers can dynamically shift. <strong>This calendar is a probability tracker, not a form of clinical contraception.</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: PREGNANCY TESTING KIT INTELLIGENCE -->
+      <div id="testing-panel" class="tab-panel space-y-6 hidden">
+        <div class="glass-panel p-5 rounded-2xl border border-zinc-800/60 shadow-xl space-y-6">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fas fa-vial text-rose-400"></i>
+              <span>Pregnancy Testing Kit Intelligence</span>
+            </h2>
+            <p class="text-xs text-zinc-400 mt-1">
+              Determine the optimal testing date based on your cycle inputs and learn the scientific background of home testing.
+            </p>
+          </div>
+
+          <!-- Calculator Results Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+            <div class="p-4 rounded-xl bg-zinc-950/40 border border-zinc-800 flex flex-col justify-between">
+              <span class="text-[10px] font-semibold text-zinc-500 uppercase">Estimated Ovulation</span>
+              <span id="calc-ovulation-date" class="text-sm font-bold text-zinc-200 mt-1.5">Calculated Date...</span>
+              <span class="text-[10px] text-zinc-400 mt-1">Typically 14 days before next period.</span>
+            </div>
+            
+            <div class="p-4 rounded-xl bg-zinc-950/40 border border-zinc-800 flex flex-col justify-between">
+              <span class="text-[10px] font-semibold text-zinc-500 uppercase">First Day of Missed Period</span>
+              <span id="calc-missed-date" class="text-sm font-bold text-zinc-200 mt-1.5">Calculated Date...</span>
+              <span class="text-[10px] text-zinc-400 mt-1">Official close of typical cycle length.</span>
+            </div>
+
+            <div class="p-4 rounded-xl bg-gradient-to-br from-rose-500/10 to-purple-600/10 border border-rose-500/30 flex flex-col justify-between">
+              <span class="text-[10px] font-semibold text-rose-300 uppercase">Optimal Testing Date</span>
+              <span id="calc-optimal-test-date" class="text-sm font-extrabold text-white mt-1.5">Calculated Date...</span>
+              <span class="text-[10px] text-rose-300/80 mt-1">Highest clinical reliability window.</span>
+            </div>
+          </div>
+
+          <!-- Countdown Alerts -->
+          <div id="calc-testing-countdown">
+            <!-- Loaded dynamically based on calculation -->
+          </div>
+
+          <!-- The Science / Why and How -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-zinc-800/60">
+            <!-- Why Card -->
+            <div class="space-y-3">
+              <h3 class="text-sm font-bold text-rose-300 flex items-center gap-2">
+                <i class="fas fa-microscope"></i>
+                <span>The "Why": Hormone Physiology (hCG)</span>
+              </h3>
+              <p class="text-xs text-zinc-400 leading-relaxed">
+                Home pregnancy kits detect <strong>human Chorionic Gonadotropin (hCG)</strong>, a hormone secreted by cells surrounding the developing embryo after implantation. 
+              </p>
+              <div class="space-y-2 text-xs">
+                <div class="p-3 rounded-lg bg-zinc-950/30 border border-zinc-900/60">
+                  <strong class="text-zinc-200">Implantation Window (Days 9-11 post-ovulation):</strong> 
+                  <p class="text-[11px] text-zinc-500 mt-0.5">hCG starts appearing in bloodstream but remains under typical test detection thresholds (&lt; 5 mIU/mL).</p>
+                </div>
+                <div class="p-3 rounded-lg bg-zinc-950/30 border border-zinc-900/60">
+                  <strong class="text-zinc-200">Early Detection Threshold (Days 12-14 post-ovulation):</strong> 
+                  <p class="text-[11px] text-zinc-500 mt-0.5">hCG climbs to 10-25 mIU/mL. Ultra-sensitive tests might catch a faint positive, but false negative risks are high.</p>
+                </div>
+                <div class="p-3 rounded-lg bg-zinc-950/30 border border-zinc-900/60">
+                  <strong class="text-zinc-200">Missed Period & Beyond (Day 15+ post-ovulation):</strong> 
+                  <p class="text-[11px] text-zinc-500 mt-0.5">hCG levels double every 48 hours, scaling over 50-100 mIU/mL. General home testing kits achieve 99% accuracy.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- How Card -->
+            <div class="space-y-3">
+              <h3 class="text-sm font-bold text-purple-300 flex items-center gap-2">
+                <i class="fas fa-clipboard-list"></i>
+                <span>The "How": Step-by-Step Instructions</span>
+              </h3>
+              
+              <ul class="space-y-3 text-xs text-zinc-400">
+                <li class="flex gap-2">
+                  <span class="w-5 h-5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 flex items-center justify-center font-bold text-[10px] flex-shrink-0">1</span>
+                  <div>
+                    <strong class="text-zinc-200 block">Collect First Morning Urine</strong>
+                    Hormone levels are most concentrated after sleeping, reducing the risk of water-diluted negative readings.
+                  </div>
+                </li>
+                <li class="flex gap-2">
+                  <span class="w-5 h-5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 flex items-center justify-center font-bold text-[10px] flex-shrink-0">2</span>
+                  <div>
+                    <strong class="text-zinc-200 block">Respect timing guidelines</strong>
+                    Submerge or drip urine per package instructions. Check the result window strictly within the 3-5 minute timeframe. Ignore lines that appear after 10 minutes (evaporation lines).
+                  </div>
+                </li>
+                <li class="flex gap-2">
+                  <span class="w-5 h-5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 flex items-center justify-center font-bold text-[10px] flex-shrink-0">3</span>
+                  <div>
+                    <strong class="text-zinc-200 block">Understanding Faint Lines</strong>
+                    Even an extremely faint colored line in the test window represents a positive detection of hCG. Evaporation lines are typically colorless or grey shadow lines.
+                  </div>
+                </li>
+                <li class="flex gap-2">
+                  <span class="w-5 h-5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 flex items-center justify-center font-bold text-[10px] flex-shrink-0">4</span>
+                  <div>
+                    <strong class="text-zinc-200 block">Confirmation Steps</strong>
+                    If you get a positive test, or get a negative test but your period is still delayed, wait 48 hours and re-test, or contact a healthcare provider for a quantitative serum hCG blood test.
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: PREGNANCY DEVELOPMENT & BODY TRANSFORMATIONS -->
+      <div id="timeline-panel" class="tab-panel space-y-6 hidden">
+        <div class="glass-panel p-5 rounded-2xl border border-zinc-800/60 shadow-xl space-y-6">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fas fa-baby text-rose-400"></i>
+              <span>Gestational Timeline & Body Changes</span>
+            </h2>
+            <p class="text-xs text-zinc-400 mt-1">
+              Track fetal development stages alongside the maternal anatomical and hormonal shifts occurring simultaneously.
+            </p>
+          </div>
+
+          <!-- Interactive Scrub Slider -->
+          <div class="p-5 rounded-xl bg-zinc-950/40 border border-zinc-800/80 space-y-4">
+            <div class="flex justify-between items-center text-xs font-bold text-zinc-400">
+              <span>Week 1 (Conception Window)</span>
+              <span id="week-display-bubble" class="px-3 py-1 rounded-full bg-rose-500 text-white font-extrabold shadow shadow-rose-900/35">Week 4</span>
+              <span>Week 12 (First Trimester Close)</span>
+            </div>
+
+            <div class="relative py-2">
+              <input type="range" id="timeline-slider" min="1" max="12" value="4" step="1"
+                     class="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer timeline-slider">
+              <!-- Grid Tick Marks -->
+              <div class="flex justify-between text-[10px] font-bold text-zinc-600 px-1 mt-2">
+                <span>W1</span>
+                <span>W2</span>
+                <span>W3</span>
+                <span class="text-rose-400">W4 (Implant)</span>
+                <span class="text-rose-400">W5 (Surge)</span>
+                <span>W6</span>
+                <span>W7</span>
+                <span class="text-rose-400">W8 (Heart)</span>
+                <span>W9</span>
+                <span>W10</span>
+                <span>W11</span>
+                <span class="text-rose-400">W12 (Fetus)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Split layout: Baby vs Body -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4 border-t border-zinc-800/60">
+            
+            <!-- Graphic / Fruit comparison card -->
+            <div class="lg:col-span-1 flex flex-col justify-center items-center p-5 rounded-xl bg-gradient-to-b from-zinc-950/40 to-zinc-950/20 border border-zinc-800 text-center relative overflow-hidden">
+              <div id="fetal-glow-graphic" class="rounded-full w-10 h-10 bg-rose-500/30 blur absolute"></div>
+              
+              <span id="baby-fruit-icon" class="text-6xl mb-4 relative z-10">🍒</span>
+              <h3 class="text-xs font-bold text-zinc-500 uppercase tracking-wider">Baby Size Comparison</h3>
+              <p id="baby-fruit-name" class="text-lg font-extrabold text-white mt-1">Poppy Seed</p>
+              <p id="baby-fruit-size" class="text-xs text-rose-300 font-semibold mt-0.5">Approx. 1-2 mm</p>
+            </div>
+
+            <!-- Interactive details comparison -->
+            <div class="lg:col-span-2 space-y-4">
+              <h3 id="timeline-milestone-title" class="text-sm font-bold text-rose-300 border-b border-zinc-800/80 pb-2">
+                Week 4: Blastocyst Implantation
+              </h3>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/50 space-y-2">
+                  <h4 class="text-xs font-bold text-purple-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fas fa-heartbeat"></i> Baby Development
+                  </h4>
+                  <p id="baby-dev-text" class="text-xs text-zinc-400 leading-relaxed">
+                    Cells divide continuously. The blastocyst roots deep into the uterine lining, separating cells into the placenta and the initial embryo structures.
+                  </p>
+                </div>
+
+                <div class="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/50 space-y-2">
+                  <h4 class="text-xs font-bold text-rose-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fas fa-user-circle"></i> Maternal Body shifts
+                  </h4>
+                  <p id="body-dev-text" class="text-xs text-zinc-400 leading-relaxed">
+                    Hormones flood the system. Implantation spotting or cramping can trigger, accompanied by early baseline shifts like intense exhaustion or chest soreness.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: CLINICAL ESCALATION ENGINE (TRIAGE) -->
+      <div id="triage-panel" class="tab-panel space-y-6 hidden">
+        <div class="glass-panel p-5 rounded-2xl border border-zinc-800/60 shadow-xl space-y-6">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fas fa-notes-medical text-rose-400"></i>
+              <span>Clinical Triage & Screening Engine</span>
+            </h2>
+            <p class="text-xs text-zinc-400 mt-1">
+              Select symptoms to screen for potential high-risk indicators and generate a summary report for consultation.
+            </p>
+          </div>
+
+          <form id="triage-form" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Symptom Checkboxes -->
+              <div class="space-y-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400 border-b border-zinc-800 pb-2">Select Key Symptoms</h3>
+                
+                <!-- Pelvic Pain -->
+                <div class="space-y-2">
+                  <label class="block text-xs font-semibold text-zinc-400">Pelvic Pain or Cramping</label>
+                  <div class="flex gap-4">
+                    <label class="inline-flex items-center text-xs text-zinc-400 cursor-pointer">
+                      <input type="radio" name="triage-pelvic" value="none" checked class="mr-2 text-rose-500 focus:ring-0"> None
+                    </label>
+                    <label class="inline-flex items-center text-xs text-zinc-400 cursor-pointer">
+                      <input type="radio" name="triage-pelvic" value="mild" class="mr-2 text-rose-500 focus:ring-0"> Mild/Standard
+                    </label>
+                    <label class="inline-flex items-center text-xs text-zinc-400 cursor-pointer">
+                      <input type="radio" name="triage-pelvic" value="severe" class="mr-2 text-rose-500 focus:ring-0"> <span class="text-red-400 font-bold">Severe/Sharp</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Spotting or Bleeding -->
+                <div class="space-y-2">
+                  <label class="block text-xs font-semibold text-zinc-400">Vaginal Bleeding/Spotting</label>
+                  <div class="flex gap-4">
+                    <label class="inline-flex items-center text-xs text-zinc-400 cursor-pointer">
+                      <input type="radio" name="triage-bleeding" value="none" checked class="mr-2 text-rose-500 focus:ring-0"> None
+                    </label>
+                    <label class="inline-flex items-center text-xs text-zinc-400 cursor-pointer">
+                      <input type="radio" name="triage-bleeding" value="spotting" class="mr-2 text-rose-500 focus:ring-0"> Light Spotting
+                    </label>
+                    <label class="inline-flex items-center text-xs text-zinc-400 cursor-pointer">
+                      <input type="radio" name="triage-bleeding" value="heavy" class="mr-2 text-rose-500 focus:ring-0"> <span class="text-red-400 font-bold">Heavy Flow</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Other Checklist switches -->
+                <div class="space-y-3 pt-2">
+                  <label class="flex items-center text-xs text-zinc-400 cursor-pointer">
+                    <input type="checkbox" id="triage-amenorrhea" class="mr-2 text-rose-500 rounded border-zinc-700 bg-zinc-800">
+                    <span>Amenorrhea exceeding 90 consecutive days (no pregnancy)</span>
+                  </label>
+                  <label class="flex items-center text-xs text-zinc-400 cursor-pointer">
+                    <input type="checkbox" id="triage-fever" class="mr-2 text-rose-500 rounded border-zinc-700 bg-zinc-800">
+                    <span>Persistent fever above 100.4°F (38°C)</span>
+                  </label>
+                  <label class="flex items-center text-xs text-zinc-400 cursor-pointer">
+                    <input type="checkbox" id="triage-dizzy" class="mr-2 text-rose-500 rounded border-zinc-700 bg-zinc-800">
+                    <span>Severe dizziness, fainting, or blurry vision</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Notes & Text info -->
+              <div class="space-y-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-zinc-400 border-b border-zinc-800 pb-2">Consultation Notes</h3>
+                <div>
+                  <label for="triage-notes" class="block text-xs font-semibold text-zinc-400 mb-1.5">Describe other notes for your doctor</label>
+                  <textarea id="triage-notes" placeholder="Describe pain frequency, location, duration, or regular cycles patterns..." rows="5"
+                            class="glass-input w-full p-3 rounded-xl text-xs resize-none"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-zinc-800/80 flex items-center justify-between gap-4">
+              <p class="text-[10px] text-zinc-500 max-w-lg">
+                Privacy Confirmation: Inputs on this page do not get uploaded or saved online. Logging is temporary until compiled into a report or cleared.
+              </p>
+              <button type="submit"
+                      class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white font-bold text-xs shadow-md transition-all duration-200">
+                Run Assessment
+              </button>
+            </div>
+          </form>
+
+          <!-- Conditionally displayed Assessment and Export Button -->
+          <div id="triage-results-box" class="hidden space-y-4">
+            <hr class="border-zinc-800" />
+            <div class="space-y-2">
+              <h3 id="triage-results-title" class="text-sm font-extrabold">Results Title</h3>
+              <p id="triage-results-desc" class="text-xs leading-relaxed opacity-95">Results Description...</p>
+              <p id="triage-results-action" class="text-xs font-semibold leading-relaxed border-t border-white/10 pt-2">Next steps...</p>
+            </div>
+
+            <button id="export-report-btn"
+                    class="py-2 px-4 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-600 text-xs font-bold flex items-center gap-2 transition-all">
+              <i class="fas fa-print"></i>
+              <span>Print / Export Symptoms for Gynaecologist Consultation</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: SYMPTOM HISTORY -->
+      <div id="logs-panel" class="tab-panel space-y-6 hidden">
+        <div class="glass-panel p-5 rounded-2xl border border-zinc-800/60 shadow-xl space-y-6">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fas fa-history text-rose-400"></i>
+              <span>Symptom Log History</span>
+            </h2>
+            <p class="text-xs text-zinc-400 mt-1">
+              Review and manage all symptom checklist inputs saved in LocalStorage.
+            </p>
+          </div>
+
+          <div id="logs-list-container" class="space-y-4">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <footer class="relative z-10 w-full max-w-7xl mx-auto px-4 py-6 mt-auto border-t border-zinc-800/40 text-center">
+    <p class="text-[10px] text-zinc-600">
+      &copy; 2026 Aura Health. Created for private cycle tracking. This app uses static browser scripts and requires zero network access.
+    </p>
+  </footer>
+
+  <!-- Toast notifications container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+  <!-- Area designated for Printing Doctor Reports -->
+  <div id="print-report-area"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

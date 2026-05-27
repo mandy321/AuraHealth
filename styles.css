@@ -1,0 +1,262 @@
+/* Stylesheet for Women's Health client-side SPA */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --color-primary: #8b5cf6;
+  --color-secondary: #f43f5e;
+  --color-dark-bg: #090514;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-dark-bg);
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 10, 25, 0.6);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.4);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(244, 63, 94, 0.6);
+}
+
+/* Ambient glow blobs */
+.bg-glow-purple {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0) 70%);
+  filter: blur(60px);
+  z-index: 0;
+  pointer-events: none;
+  animation: float-slow 25s infinite alternate ease-in-out;
+}
+
+.bg-glow-rose {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(244, 63, 94, 0.12) 0%, rgba(244, 63, 94, 0) 70%);
+  filter: blur(80px);
+  z-index: 0;
+  pointer-events: none;
+  animation: float-slow-reverse 30s infinite alternate ease-in-out;
+}
+
+@keyframes float-slow {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(100px, 50px) scale(1.1);
+  }
+}
+
+@keyframes float-slow-reverse {
+  0% {
+    transform: translate(0, 0) scale(1.1);
+  }
+  100% {
+    transform: translate(-100px, -50px) scale(0.9);
+  }
+}
+
+/* Glassmorphism panel styles */
+.glass-panel {
+  background: rgba(17, 12, 28, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-panel-hover:hover {
+  border-color: rgba(244, 63, 94, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(244, 63, 94, 0.05);
+}
+
+/* Glass Inputs */
+.glass-input {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transition: all 0.2s ease-in-out;
+}
+
+.glass-input:focus {
+  outline: none;
+  border-color: rgba(139, 92, 246, 0.6);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.15);
+}
+
+/* Phase styling for calendar cells */
+.phase-menstrual {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(239, 68, 68, 0.08) 100%);
+  border: 1.5px solid rgba(239, 68, 68, 0.4) !important;
+}
+
+.phase-follicular {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(59, 130, 246, 0.08) 100%);
+  border: 1.5px solid rgba(59, 130, 246, 0.4) !important;
+}
+
+.phase-ovulatory {
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.35) 0%, rgba(244, 63, 94, 0.15) 100%);
+  border: 1.5px solid rgba(244, 63, 94, 0.7) !important;
+  box-shadow: 0 0 12px rgba(244, 63, 94, 0.2);
+  animation: glow-pulse 2s infinite ease-in-out;
+}
+
+.phase-luteal {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(168, 85, 247, 0.08) 100%);
+  border: 1.5px solid rgba(168, 85, 247, 0.4) !important;
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(244, 63, 94, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(244, 63, 94, 0.35);
+  }
+}
+
+/* Calendar selected/today indicator */
+.day-selected {
+  position: relative;
+}
+.day-selected::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  width: 5px;
+  height: 5px;
+  background-color: #fff;
+  border-radius: 50%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.day-today {
+  outline: 2px solid #fff;
+  outline-offset: -2px;
+}
+
+/* Custom transitions and sliders */
+.transition-all-300 {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.timeline-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #f43f5e;
+  cursor: pointer;
+  border: 3px solid #fff;
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.5);
+  transition: transform 0.1s ease;
+}
+
+.timeline-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+}
+
+.timeline-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #f43f5e;
+  cursor: pointer;
+  border: 3px solid #fff;
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.5);
+  transition: transform 0.1s ease;
+}
+
+.timeline-slider::-moz-range-thumb:hover {
+  transform: scale(1.25);
+}
+
+/* Print Styling */
+@media print {
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 12pt;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Hide everything not relevant to the printed clinical report */
+  body > *:not(#print-report-area) {
+    display: none !important;
+  }
+
+  #print-report-area {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    padding: 20px !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  /* Design a professional clinical sheet layout */
+  .clinical-box {
+    border: 1px solid #ccc !important;
+    padding: 15px !important;
+    margin-bottom: 20px !important;
+    border-radius: 4px;
+    background: #f9f9f9 !important;
+    color: #000 !important;
+    page-break-inside: avoid;
+  }
+
+  h1, h2, h3, h4 {
+    color: #000 !important;
+    margin-top: 10px;
+    margin-bottom: 5px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  th, td {
+    border: 1px solid #ddd !important;
+    padding: 8px;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f2f2f2 !important;
+    color: black !important;
+  }
+}
+
+/* Utility to hide print report area in standard browser view */
+#print-report-area {
+  display: none;
+}
